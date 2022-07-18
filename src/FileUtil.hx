@@ -1,5 +1,26 @@
+import dn.FileTools;
+import dn.FilePath;
 
 class FileUtil {
+	public static function initDistDir(d:String) {
+		if(Term.hasOption('verbose'))
+			Term.print("Initializing folder: " + d);
+
+		try {
+			
+			var cwd = StringTools.replace(Sys.getCwd(), "\\", "/");
+			var abs = StringTools.replace(sys.FileSystem.absolutePath(d), "\\", "/");
+			if(abs.indexOf(cwd) < 0 || abs == cwd)
+				Term.error("For security reasons, target folder should be nested inside current folder.");
+
+			FileTools.deleteDirectoryRec(d);
+			createDirectory(d);
+		}
+		catch(e:Dynamic) {
+			Term.error("Couldn't initialize dir " + d + ". Maybe it's in use or opened somewhere right now?");
+		}
+	}
+
     public static function createTextFile(path:String, content:String) {
 		sys.io.File.saveContent(path, content);
 	}
@@ -9,16 +30,16 @@ class FileUtil {
 			sys.FileSystem.createDirectory(path);
 		}
 		catch(e:Dynamic) {
-			Terminal.error("Couldn't create directory "+path+". Maybe it's in use right now? [ERR:"+e+"]");
+			Term.error("Couldn't create directory "+path+". Maybe it's in use right now? [ERR:"+e+"]");
 		}
 	}
 
     public static function removeDirectory(path:String) {
-		if( !sys.FileSystem.exists(path) )
+		if(!sys.FileSystem.exists(path))
 			return;
 
-		for( e in sys.FileSystem.readDirectory(path) ) {
-			if( sys.FileSystem.isDirectory(path+"/"+e) )
+		for(e in sys.FileSystem.readDirectory(path)) {
+			if(sys.FileSystem.isDirectory(path+"/"+e))
 				removeDirectory(path+"/"+e);
 			else
 				sys.FileSystem.deleteFile(path+"/"+e);
@@ -26,43 +47,47 @@ class FileUtil {
 		sys.FileSystem.deleteDirectory(path+"/");
 	}
 
+	public static function cleanUpExit() {
+		Term.print("Cleaning up...");
+	}
+
     public static function copy(from:String, to:String) {
 		try {
 			sys.io.File.copy(from, to);
 		}
 		catch(e:Dynamic) {
-			Terminal.error("Can't copy "+from+" to "+to+" ("+e+")");
+			Term.error("Can't copy "+from+" to "+to+" ("+e+")");
 		}
 	}
 
-    public static function findFile(f:String, useHl32bits:Bool) {
-		if( sys.FileSystem.exists(redistHelperDir+f) )
-			return redistHelperDir+f;
+    public static function findFile(distDir:String, f:String, useHl32bits:Bool) {
+		if(sys.FileSystem.exists(distDir + f))
+			return distDir + f;
 
 		var paths = [];
 
 		// Prioritize files from the RedistHelper folder
-		if( useHl32bits )
-			paths.push(redistHelperDir+"redistFiles/hl32/");  // HL 32bits in priority over 64bits
-		paths.push(redistHelperDir+"redistFiles/hl64/"); // HL 64bits
-		paths.push(redistHelperDir+"redistFiles/");
+		if(useHl32bits)
+			paths.push(distDir + "redistFiles/hl32/");  // HL 32bits in priority over 64bits
+		paths.push(distDir + "redistFiles/hl64/"); // HL 64bits
+		paths.push(distDir + "redistFiles/");
 
 		// Locate haxe tools
 		var haxeTools = ["haxe.exe", "hl.exe", "neko.exe" ];
 		for(path in Sys.getEnv("PATH").split(";")) {
 			path = cleanUpDirPath(path);
 			for(f in haxeTools)
-				if( sys.FileSystem.exists(path+f) ) {
+				if(sys.FileSystem.exists(path+f)) {
 					paths.push(path);
 					break;
 				}
 		}
 
-		if( paths.length<=0 )
+		if(paths.length<=0)
 			throw "Haxe tools not found ("+haxeTools.join(", ")+") in PATH!";
 
 		for(path in paths)
-			if( sys.FileSystem.exists(path+f) )
+			if(sys.FileSystem.exists(path+f))
 				return path+f;
 
 		throw "File not found: "+f+", lookup paths="+paths.join(", ");
@@ -70,87 +95,55 @@ class FileUtil {
 
     public static function checkExeInPath(exe:String) {
 		var p = new sys.io.Process("where /q "+exe);
-		if( p.exitCode()==0 )
+		if(p.exitCode()==0)
 			return true;
 		else
 			return false;
 	}
 
-    public static function getFullHxml(f:String) {
-		var lines = sys.io.File.read(f, false).readAll().toString().split(NEW_LINE);
-		var i = 0;
-		while( i<lines.length ) {
+    public static function getFullHxml(f:String): Array<String> {
+		var lines = sys.io.File.getContent(f).split('\n');
+		var finalLines = [];
+		
+		finalLines = lines.map((line) -> {
+			line = line.split('#')[0];
 
-			// trims the comment content from the line.
-			var commentHash = lines[i].indexOf("#");
-			if( commentHash >= 0 )
-				lines[i] = lines[i].substr(0, commentHash);
+			if(line.indexOf(".hxml") >= 0 && line.indexOf("-cmd") < 0) {
+				finalLines.concat(getFullHxml(line));
+				return '';
+			} else {
+				return line;
+			}
+		});
 
-			if( lines[i].indexOf(".hxml")>=0 && lines[i].indexOf("-cmd")<0 )
-				lines[i] = getFullHxml(lines[i]);
-			i++;
-		}
+		Term.print(finalLines);
 
-		return lines.join(NEW_LINE);
+		return finalLines;
 	}
 
     public static function directoryContainsOnly(path:String, allowedExts:Array<String>, ignoredFiles:Array<String>) {
-		if( !sys.FileSystem.exists(path) )
+		if(!sys.FileSystem.exists(path))
 			return;
 
-		for( e in sys.FileSystem.readDirectory(path) ) {
-			if( sys.FileSystem.isDirectory(path+"/"+e) )
+		for(e in sys.FileSystem.readDirectory(path)) {
+			if(sys.FileSystem.isDirectory(path+"/"+e))
 				directoryContainsOnly(path+"/"+e, allowedExts, ignoredFiles);
 			else {
 				var suspFile = true;
-				if( e.indexOf(".")<0 )
+				if(e.indexOf(".")<0)
 					suspFile = false; // ignore extension-less files
 
 				for(ext in allowedExts)
-					if( e.indexOf("."+ext)>0 ) {
+					if(e.indexOf("."+ext)>0) {
 						suspFile = false;
 						break;
 					}
 				for(f in ignoredFiles)
-					if( f==e )
+					if(f==e)
 						suspFile = false;
-				if( suspFile )
-					error("Output folder \""+path+"\" (which will be deleted) seems to contain unexpected files like "+e);
+				if(suspFile)
+					Term.error("Output folder \""+path+"\" (which will be deleted) seems to contain unexpected files like "+e);
 			}
-		}
-	}
-
-    public static function initRedistDir(d:String, extraFiles:Array<ExtraCopiedFile>) {
-		if( verbose )
-			Lib.println("Initializing folder: "+d+"...");
-		try {
-			// List all extra files, including folders content
-			var allExtraFiles = [];
-			for(f in extraFiles)
-				if( !f.isDir )
-					allExtraFiles.push(f.rename!=null ? f.rename : f.source.fileWithExt);
-				else {
-					var all = FileTools.listAllFilesRec(f.source.full);
-					for(f in all.files)
-						allExtraFiles.push( FilePath.extractFileWithExt(f) );
-				}
-
-
-			var cwd = StringTools.replace( Sys.getCwd(), "\\", "/" );
-			var abs = StringTools.replace( sys.FileSystem.absolutePath(d), "\\", "/" );
-			if( abs.indexOf(cwd)<0 || abs==cwd )
-				error("For security reasons, target folder should be nested inside current folder.");
-			// avoid deleting unexpected files
-			directoryContainsOnly(
-				d,
-				["exe","dat","dll","hdll","ndll","js","swf","html","dylib","zip","lib","bin","bat","pak"],
-				allExtraFiles
-			);
-			FileTools.deleteDirectoryRec(d);
-			createDirectory(d);
-		}
-		catch(e:Dynamic) {
-			error("Couldn't initialize dir "+d+". Maybe it's in use or opened somewhere right now?");
 		}
 	}
 
@@ -160,64 +153,20 @@ class FileUtil {
 		return fp.directoryWithSlash;
 	}
 
-    public static function copyExtraFilesIn(extraFiles:Array<ExtraCopiedFile>, targetPath:String) {
-		if( extraFiles.length==0 )
-			return;
-
-		Sys.println("Copying extra files to "+targetPath+"...");
-
-		// Ignored files/dirs
-		var ignores = getIgnoredElements();
-		ignores.names.push(".tmp");
-		ignores.names.push(".git");
-		ignores.names.push(".svn");
-		Sys.println("  Ignoring: names="+ignores.names+" extensions="+ignores.exts);
-
-		// Copy extra files/dirs
-		for(f in extraFiles) {
-			if( f.isDir ) {
-				// Copy a directory structure
-				if( verbose )
-					Lib.println(" -> DIRECTORY: "+projectDir+f.source.full+"  =>  "+targetPath);
-				FileTools.copyDirectoryRec(f.source.full, targetPath, ignores.names, ignores.exts);
-
-				// Rename
-				if( f.rename!=null ) {
-					var arr = f.source.getDirectoryArray();
-					var folderName = arr[arr.length-1];
-					if( verbose )
-						Lib.println("   -> renaming "+targetPath+"/"+folderName+" to: "+targetPath+"/"+f.rename);
-					sys.FileSystem.rename(targetPath+"/"+folderName, targetPath+"/"+f.rename);
-				}
-			}
-			else {
-				// Copy a file
-				var to = f.source.fileWithExt;
-				if( f.rename!=null )
-					to = f.rename;
-				if( verbose )
-					Lib.println(" -> FILE: "+projectDir+f.source.full+"  =>  "+targetPath+"/"+to);
-				copy(projectDir+f.source.full, targetPath+"/"+to);
-			}
-		}
-	}
-
     public static function zipFolder(zipPath:String, basePath:String) {
-		if( zipPath.indexOf(".zip")<0 )
+		if(zipPath.indexOf(".zip")<0)
 			zipPath+=".zip";
 
-		Lib.println("Zipping "+basePath+"...");
-		if( !verbose )
-			Lib.print(" -> ");
+		Term.print("Zipping " + basePath + "...");
 
 		// List entries
 		var entries : List<haxe.zip.Entry> = new List();
 		var pendingDirs = [basePath];
-		while( pendingDirs.length>0 ) {
+		while(pendingDirs.length>0) {
 			var cur = pendingDirs.shift();
-			for( fName in sys.FileSystem.readDirectory(cur) ) {
+			for(fName in sys.FileSystem.readDirectory(cur)) {
 				var path = cur+"/"+fName;
-				if( sys.FileSystem.isDirectory(path) ) {
+				if(sys.FileSystem.isDirectory(path)) {
 					pendingDirs.push(path);
 					entries.add({
 						fileName: path.substr(basePath.length+1) + "/",
@@ -247,18 +196,64 @@ class FileUtil {
 		// Zip entries
 		var out = new haxe.io.BytesOutput();
 		for(e in entries)
-			if( e.data.length>0 ) {
-				if( verbose )
-					Sys.println(" -> Compressing: "+e.fileName+" ("+e.fileSize+" bytes)");
+			if(e.data.length>0) {
+				if(Term.hasOption('verbose'))
+					Term.print(" -> Compressing: "+e.fileName+" ("+e.fileSize+" bytes)");
 				else
-					Sys.print("*");
+					Term.print("*");
 				e.crc32 = haxe.crypto.Crc32.make(e.data);
 				haxe.zip.Tools.compress(e,9);
 			}
 		var w = new haxe.zip.Writer(out);
 		w.write(entries);
-		Lib.println(" -> Created "+zipPath+" ("+out.length+" bytes)");
+		Term.print(" -> Created "+zipPath+" ("+out.length+" bytes)");
 		sys.io.File.saveBytes(zipPath, out.getBytes());
+	}
+
+	public static function signExecutable(exePath:String) {
+		Term.print("Code signing executable...");
+
+		// Check EXE
+		if(!sys.FileSystem.exists(exePath))
+			Term.error("Cannot sign executable, file not found: " + exePath);
+
+		var fp = FilePath.fromFile(exePath);
+		if(fp.extension!="exe") {
+			Term.print("  Warning: only supported on Windows executables");
+			return false;
+		}
+
+
+		// Check if MS SignTool is installed
+		if(!checkExeInPath("signtool.exe"))
+			Term.error('You need "signtool.exe" in PATH. You can get it by installing Microsoft Windows SDK (only pick "signing tools").');
+
+		// Get PFX path from either argument or env "CSC_LINK"
+		var pfx : Null<String> = null;
+		if(Term.hasParam("pfx") && !Term.hasOption("-sign"))
+			Term.error('Argument "-pfx" implies to also have "-sign" arg.');
+
+		if(Term.hasOption("sign")) {
+			pfx = Term.getParam("pfx");
+			if(pfx==null || pfx=="")
+				pfx = Sys.getEnv("CSC_LINK");
+			if(pfx==null || !sys.FileSystem.exists(pfx))
+				Term.error("Certificate file (.pfx) is missing after -pfx argument.");
+		}
+
+		Term.print('  Using certificate: $pfx');
+
+		// Get password for env "CSC_KEY_PASSWORD" or by asking the user for it
+		var pass = Term.hasOption("-pfx") ? null : Sys.getEnv("CSC_KEY_PASSWORD");
+		if(pass==null) {
+			Term.print("  Enter PFX password: ");
+			pass = Sys.stdin().readLine();
+		}
+		var result = Sys.command('signtool.exe sign /f "$pfx" /fd SHA256 /t http://timestamp.digicert.com /p "$pass" $exePath');
+		if(result!=0)
+			Term.error('Code signing failed! (code $result)');
+
+		return true;
 	}
 	
 }

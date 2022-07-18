@@ -11,12 +11,6 @@ typedef RuntimeFile = {
 	var ?executableFormat: String;
 }
 
-typedef ExtraCopiedFile = {
-	var source : FilePath;
-	var isDir : Bool;
-	var rename: Null<String>;
-}
-
 enum Platform {
 	Windows;
 	Macos;
