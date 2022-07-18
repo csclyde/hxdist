@@ -1,0 +1,13 @@
+{
+  "name": "hx-dist",
+  "url" : "https://github.com/csclydd/hx-dist",
+  "license": "Apache",
+  "tags": ["Heaps","Hashlink","package","dist"],
+  "description": "A script to create distributable packages for Haxe applications",
+  "version": "0.6.0",
+  "classPath": "src/",
+  "releasenote": "Added Linux HL support",
+  "contributors": ["sbenard", "csclyde"],
+  "dependencies": {},
+  "main": "Main"
+}
