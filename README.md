@@ -10,6 +10,12 @@ For now, hxdist only targets HashLink apps. For those, it will create Win/Mac/Li
 haxelib install hxdist
 ```
 
+Or, a development version can be installed from github:
+
+```
+haxelib git hxdist https://github.com/csclyde/hxdist.git
+```
+
 ## Usage
 
 ```
