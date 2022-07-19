@@ -2,13 +2,11 @@ class Term {
 	public static var options: Map<String, Array<String>> = [
 		'help' => ['-h', '--help'],
 		'verbose' => ['-v', '--verbose'],
-		'zip' => ['-z', '--zip'],
-		'sign' => ['-sign'],
-		'pak' => ['-pak'],
-		'win' => ['-win'],
-		'win32' => ['-win32'],
-		'mac' => ['-mac'],
-		'linux' => ['-linux'],
+		'zip' => ['-z', '-zip', '--zip'],
+		'sign' => ['-sign', '--sign'],
+		'win' => ['-win', '--win', '-windows', '--windows'],
+		'mac' => ['-mac', '--mac', '-macos', '--macos'],
+		'linux' => ['-linux', '--linux', '-lin', '--lin'],
 	];
 
 	public static var params: Map<String, Array<String>> = [

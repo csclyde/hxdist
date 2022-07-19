@@ -60,17 +60,15 @@ class FileUtil {
 		}
 	}
 
-    public static function findFile(distDir:String, f:String, useHl32bits:Bool) {
+    public static function findFile(distDir:String, f:String) {
 		if(sys.FileSystem.exists(distDir + f))
 			return distDir + f;
 
 		var paths = [];
 
 		// Prioritize files from the RedistHelper folder
-		if(useHl32bits)
-			paths.push(distDir + "redistFiles/hl32/");  // HL 32bits in priority over 64bits
-		paths.push(distDir + "redistFiles/hl64/"); // HL 64bits
-		paths.push(distDir + "redistFiles/");
+		paths.push(distDir + "dist_files/hl_win/"); // HL 64bits
+		paths.push(distDir + "dist_files/");
 
 		// Locate haxe tools
 		var haxeTools = ["haxe.exe", "hl.exe", "neko.exe" ];
@@ -101,22 +99,21 @@ class FileUtil {
 			return false;
 	}
 
-    public static function getFullHxml(f:String): Array<String> {
-		var lines = sys.io.File.getContent(f).split('\n');
+    public static function parseHxml(dir:String, f:String): Array<String> {
+		var lines = sys.io.File.getContent(dir + f).split('\n');
 		var finalLines = [];
-		
-		finalLines = lines.map((line) -> {
-			line = line.split('#')[0];
+
+		for(line in lines) {
+			if(line == '') continue;
+
+			line = StringTools.trim(line.split('#')[0]);
 
 			if(line.indexOf(".hxml") >= 0 && line.indexOf("-cmd") < 0) {
-				finalLines.concat(getFullHxml(line));
-				return '';
+				finalLines = finalLines.concat(parseHxml(dir, line));
 			} else {
-				return line;
+				finalLines.push(line);
 			}
-		});
-
-		Term.print(finalLines);
+		}
 
 		return finalLines;
 	}
@@ -154,8 +151,8 @@ class FileUtil {
 	}
 
     public static function zipFolder(zipPath:String, basePath:String) {
-		if(zipPath.indexOf(".zip")<0)
-			zipPath+=".zip";
+		if(zipPath.indexOf(".zip") < 0)
+			zipPath += ".zip";
 
 		Term.print("Zipping " + basePath + "...");
 

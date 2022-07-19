@@ -9,6 +9,7 @@ class Main {
 	static var projectDir = "";
 	static var projectName = "unknown";
 	static var verbose = false;
+	static var zipping = false;
 
 	static function main() {
 		FilePath.SLASH_MODE = OnlySlashes;
@@ -20,7 +21,7 @@ class Main {
 		}
 
 		verbose = Term.hasOption("verbose");
-		var zipping = Term.hasOption("zip");
+		zipping = Term.hasOption("zip");
 
 		// Set CWD to the directory haxelib was called
 		distDir = FileUtil.cleanUpDirPath(Sys.getCwd());
@@ -63,152 +64,36 @@ class Main {
 
 		// Parse HXML files given as parameters
 		for(hxml in Term.hxmlPaths) {
-			Term.print("Parsing " + hxml);
-			var content = FileUtil.getFullHxml(projectDir + hxml);
+			Term.print("Parsing " + hxml + "...");
+			var content = FileUtil.parseHxml(projectDir, hxml);
 
-			/*
 			// HL
-			if(content.contains("-hl ")) {
-				// Build
-				var directX = content.contains("hldx");
+			if(content.filter((c) -> c.indexOf("-hl ") >= 0).length > 0) {
 
 				Term.print("Building " + hxml + "...");
 				compile(hxml);
 
-				function makeHl(hlDir:String, files:RuntimeFiles, use32bits:Bool) {
-					Term.print("Packaging " + hlDir+"...");
-					initDistDir(hlDir, extraFiles);
-
-					// Create folder
-					createDirectory(hlDir);
-
-					// Runtimes
-					copyRuntimeFiles(hxml, "HL", hlDir, files, use32bits);
-
-					// Copy HL bin file
-					var out = getHxmlOutput(hxml,"-hl");
-					copy(out, hlDir+"/hlboot.dat");
-				}
-
-				// Package HL
-				if(directX) {
-					// DirectX 64bits
-					makeHl(outputDir+"/directx/" + projectName, HL_RUNTIME_FILES_WIN, false);
+				// SDL Windows
+				if(Term.hasOption('win')) {
+					packageHL(hxml, outputDir + "/hl_win/" + projectName, Deps.HL_RUNTIME_FILES_WIN);
 					if(zipping)
-						zipFolder('$outputDir/${projectName}_directx.zip', outputDir+"/directx");
-
-					// DirectX 32bits
-					if(Term.hasOption("-hl32")) {
-						makeHl(outputDir+"/directx32/" + projectName, HL_RUNTIME_FILES_WIN, true); // directX 32 bits
-						if(zipping)
-							zipFolder('$outputDir/${projectName}_directx32.zip', outputDir+"/directx32");
-					}
+						FileUtil.zipFolder('${outputDir}/${projectName}_hl_win.zip', outputDir + "/hl_win/");
 				}
-				else {
-					// SDL Windows 64bits
-					makeHl(outputDir+"/opengl_win/" + projectName, HL_RUNTIME_FILES_WIN, false);
+
+				// SDL Mac
+				if(Term.hasOption("mac")) {
+					packageHL(hxml, outputDir + "/hl_mac/" + projectName, Deps.HL_RUNTIME_FILES_MAC);
 					if(zipping)
-						zipFolder('$outputDir/${projectName}_opengl_win.zip', outputDir+"/opengl_win/");
+						FileUtil.zipFolder('${outputDir}/${projectName}_hl_mac.zip', outputDir + "/hl_mac/");
+				}
 
-					// SDL Windows 32bits
-					if(Term.hasOption("-hl32")) {
-						makeHl(outputDir+"/opengl_win32/" + projectName, HL_RUNTIME_FILES_WIN, true);
-						if(zipping)
-							zipFolder('$outputDir/${projectName}_opengl_win32.zip', outputDir+"/opengl_win32/");
-					}
-
-					// SDL Mac
-					// if(Term.hasOption("-mac")) {
-					// 	makeHl(baseRedistDir+"/opengl_mac/" + projectName, HL_RUNTIME_FILES_MAC, false);
-					// 	if(zipping)
-					// 		zipFolder('$baseRedistDir/${projectName}_opengl_mac.zip', baseRedistDir+"/opengl_mac/");
-					// }
-
-					// SDL Linux
-					if(Term.hasOption("-linux")) {
-						makeHl(outputDir+"/opengl_linux/" + projectName, HL_RUNTIME_FILES_LINUX, false);
-						if(zipping)
-							zipFolder('$outputDir/${projectName}_opengl_linux.zip', outputDir+"/opengl_linux/");
-					}
+				// SDL Linux
+				if(Term.hasOption("linux")) {
+					packageHL(hxml, outputDir + "/hl_linux/" + projectName, Deps.HL_RUNTIME_FILES_LINUX);
+					if(zipping)
+						FileUtil.zipFolder('${outputDir}/${projectName}_hl_linux.zip', outputDir + "/hl_linux/");
 				}
 			}
-
-			// JS
-			if(content.contains("-js ")) {
-				// Build
-				var jsDir = outputDir+"/js";
-				initDistDir(jsDir, extraFiles);
-
-				Term.print("Building " + hxml+"...");
-				compile(hxml);
-
-				Term.print("Packaging " + jsDir+"...");
-				var out = getHxmlOutput(hxml,"-js");
-				copy(out, jsDir+"/client.js");
-
-				// Create HTML
-				Term.print("Creating HTML...");
-				var fi = sys.io.File.read(distDir+"redistFiles/webgl.html");
-				var html = "";
-				while(!fi.eof())
-				try { html += fi.readLine()+'\n'; } catch(e:haxe.io.Eof) {}
-				html = StringTools.replace(html, "%project%", projectName);
-				html = StringTools.replace(html, "%js%", "client.js");
-				var fo = sys.io.File.write(jsDir+"/index.html", false);
-				fo.writeString(html);
-				fo.close();
-
-				if(zipping)
-					zipFolder(outputDir+"/js.zip", jsDir);
-			}
-
-			// Neko
-			if(content.contains("-neko ")) {
-				var nekoDir = outputDir+"/neko";
-				initDistDir(nekoDir, extraFiles);
-
-				Term.print("Building " + hxml+"...");
-				compile(hxml);
-
-				Term.print("Creating executable...");
-				var out = FilePath.fromFile(getHxmlOutput(hxml,"-neko"));
-				Sys.command("nekotools", ["boot",out.full]);
-				out.extension = "exe";
-
-				Term.print("Packaging " + nekoDir+"...");
-				copy(out.full, nekoDir+"/" + projectName+".exe");
-				if(Term.hasOption("-sign"))
-					signExecutable(nekoDir+"/" + projectName+".exe");
-
-				copyRuntimeFiles(hxml, "Neko", nekoDir, NEKO_RUNTIME_FILES_WIN, false);
-
-				if(zipping)
-					zipFolder(outputDir+"/neko.zip", nekoDir);
-			}
-
-			// SWF
-			if(content.contains("-swf ")) {
-				var swfDir = '$outputDir/flash/$projectName';
-				initDistDir(swfDir, extraFiles);
-
-				Term.print("Building " + hxml+"...");
-				compile(hxml);
-
-				Term.print("Packaging " + swfDir+"...");
-				var out = getHxmlOutput(hxml,"-swf");
-				copy(out, swfDir+"/" + projectName+".swf");
-				copyRuntimeFiles(hxml, "SWF", swfDir, SWF_RUNTIME_FILES_WIN, false);
-
-				var script = [
-					'@echo off',
-					'start flashPlayer.bin $projectName.swf',
-				];
-				createTextFile('$swfDir/Play $projectName.bat', script.join("\n"));
-
-				if(zipping)
-					zipFolder(outputDir+"/swf.zip", swfDir);
-			}
-			*/
 		}
 
 		FileUtil.cleanUpExit();
@@ -216,7 +101,19 @@ class Main {
 		Sys.exit(0);
 	}
 
-	
+	static function packageHL(hxml:String, hlDir:String, files:Deps.RuntimeFiles) {
+		Term.print("Packaging " + hlDir + "...");
+		FileUtil.initDistDir(hlDir);
+		FileUtil.createDirectory(hlDir);
+
+		// Runtimes
+		copyRuntimeFiles(hxml, "HL", hlDir, files);
+
+		// Copy HL bin file
+		var out = getHxmlOutput(hxml,"-hl");
+		FileUtil.copy(out, hlDir+"/hlboot.dat");
+	}
+
 
 	static function compile(hxmlPath:String) {
 		// Compile
@@ -224,16 +121,16 @@ class Main {
 			Term.error('Compilation failed!');
 	}
 
-	static function copyRuntimeFiles(hxmlPath:String, targetName:String, targetDir:String, runTimeFiles:Deps.RuntimeFiles, useHl32bits:Bool) {
+	static function copyRuntimeFiles(hxmlPath:String, targetName:String, targetDir:String, runTimeFiles:Deps.RuntimeFiles) {
 		if(verbose)
-			Term.print("Copying " + targetName+" runtime files to " + targetDir+"... ");
+			Term.print("Copying " + targetName + " runtime files to " + targetDir + "... ");
 
 		var exes = [];
 		for(r in runTimeFiles.files) {
 			if(r.lib==null || hxmlRequiresLib(hxmlPath, r.lib)) {
 				try {
-					var fileName = useHl32bits && r.f32!=null ? r.f32 : r.f;
-					var from = FileUtil.findFile(distDir, fileName, useHl32bits);
+					var fileName = r.f;
+					var from = FileUtil.findFile(distDir, fileName);
 
 					if(verbose)
 						Term.print(" -> " + fileName + (r.lib==null?"" : " [required by -lib " + r.lib+"] (source: " + from+")"));
@@ -308,7 +205,7 @@ class Main {
 			Term.error("File not found: " + hxmlPath);
 
 		try {
-			var content = FileUtil.getFullHxml(hxmlPath);
+			var content = FileUtil.parseHxml(projectDir, hxmlPath);
 			for(line in content) {
 				if(line.indexOf(lookFor)>=0)
 					return StringTools.trim(line.split(lookFor)[1]);
