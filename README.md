@@ -1,32 +1,31 @@
 # About
 
-A small script to quickly create redistribuable of an existing simple HL/JS/SWF haxe project.
+A program to package Haxe applications for distribution. Based off of redistHelper by Sébastien Bénard (https://github.com/deepnight/redistHelper).
 
-It will copy all the required files in a specified folder ("redist" by default), so you just have to distribute this folder content. Especially useful to package a HashLink (HL) project.
+For now, hxdist only targets HashLink apps. For those, it will create Win/Mac/Linux packages with all the required library files, the HashLink executable, and a build of the project. I set it up so that additional targets should be easy to add in the future. Feel free to request them, or create a PR for them if you can.
 
 # Install
 
 ```
-haxelib install redistHelper
+haxelib install hxdist
 ```
 
 ## Usage
 
 ```
 USAGE:
-    haxelib run redistHelper [-o <outputFolder>] [-p <project_name>] [<hxml1>] [<hxml2>] [<hxml3>]
-NOTES:
-    If no HXML is given, the script will pick all HXMLs found in current directory.
-    If no Project Name is set, the current folder name will be used.
+    haxelib run hxdist [<hxml1>] [<hxml2>] [<hxml3>]
+FLAGS:
+    -h Show tool usage
+    -v Verbose output
+    -z Create .zip files for each platform
+    -win Build for Windows
+    -mac Build for MacOS
+    -linux Build for Linux
+PARAMS:
+    [-p <project_name>] Defaults to the project folder name
+    [-o <output_dir>] Defaults to /dist within your project folder
 EXAMPLES:
-    haxelib run redistHelper      // automatically finds HXMLs and build them into ./redist/
-    haxelib run redistHelper hashlink.hxml -o someFolder -p MyGreatGame
-    haxelib run redistHelper hashlink.hxml flash.hxml webgl.hxml
+    haxelib run hxdist -mac hashlink.hxml -o someFolder -p MyGreatGame
+    haxelib run hxdist -win -mac -linux -z hashlink.hxml flash.hxml webgl.hxml
 ```
-
-## Parameters
-
- - ``-o <output_folder>`` : specify folder where all redist files will be copied. Note: **this folder and its content will be erased each time the script is ran!** Make sure it doesn't contain important stuff (a few basic checks are done, just in case). Default is "redist".
- - ``-p <project_name>`` : change the file names of each build (like <project_name>.js for JS target or <project_name>.exe for HL). Default is the current folder name.
- - ``<hxml_N>`` : depending on the target as defined inside the HXML, all the corresponding runtime files will be created in the ``output_folder``. You can pass multiple HXML files (separated by a space) to package multiple builds in one pass. Supports JS, HL and SWF target so far. If you don't give any HXML parameter, the script will just explore current folder to gather them. Only HXMLs with compatible output will be used.
-

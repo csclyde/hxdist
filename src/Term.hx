@@ -1,6 +1,6 @@
 class Term {
 	public static var options: Map<String, Array<String>> = [
-		'help' => ['-h', '--help'],
+		'help' => ['-h', '-help', '--help'],
 		'verbose' => ['-v', '--verbose'],
 		'zip' => ['-z', '-zip', '--zip'],
 		'sign' => ['-sign', '--sign'],
