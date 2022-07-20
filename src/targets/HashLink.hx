@@ -1,5 +1,7 @@
 package targets;
 
+import sys.FileSystem;
+
 class HashLink extends Target {
     public function new(dd:String, pd: String, pn:String) {
         super(dd, pd, pn);
@@ -15,7 +17,12 @@ class HashLink extends Target {
         createPackage(hxmlContent, outputDir + "/hl_mac/" + projName, macFiles);
         createPackage(hxmlContent, outputDir + "/hl_linux/" + projName, linuxFiles);
 
-        // Sys.command('chmod', ['+x', outputDir + '/hl_linux/' + projName + '/' + projName]);
+		var linuxExecutable = outputDir + '/hl_linux/' + projName + '/' + projName;
+		if(Sys.command('chmod', ['+x', linuxExecutable]) == 0) {
+			Term.print("Updated the linux file with execute permissions...");
+		} else {
+			Term.warning("Unable to give the linux executable 'execute' permissions. If on Windows, try running this from a Linux subsystem.");
+		}
     }
 
     function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
