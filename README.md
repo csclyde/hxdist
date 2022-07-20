@@ -35,3 +35,10 @@ EXAMPLES:
     haxelib run hxdist -mac hashlink.hxml -o someFolder -p MyGreatGame
     haxelib run hxdist -win -mac -linux -z hashlink.hxml flash.hxml webgl.hxml
 ```
+
+## Internal Info
+
+Working gcc command
+```
+gcc -o bin/Necrovale -std=c11 -I bin/tmp/ bin/tmp/client.c -lhl /usr/local/lib/*.hdll -lm -lGL
+```

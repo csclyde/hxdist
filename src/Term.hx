@@ -4,9 +4,6 @@ class Term {
 		'verbose' => ['-v', '--verbose'],
 		'zip' => ['-z', '-zip', '--zip'],
 		'sign' => ['-sign', '--sign'],
-		'win' => ['-win', '--win', '-windows', '--windows'],
-		'mac' => ['-mac', '--mac', '-macos', '--macos'],
-		'linux' => ['-linux', '--linux', '-lin', '--lin'],
 	];
 
 	public static var params: Map<String, Array<String>> = [
@@ -80,44 +77,7 @@ class Term {
 		Sys.exit(1);
 	}
 
-    public static function usage() {
-		Sys.println("");
-		Sys.println("USAGE:");
-		Sys.println("  haxelib run redistHelper <hxml1> [<hxml2>] [<hxml3>] [customFile1] [customFile2]");
-		Sys.println("");
-		Sys.println("EXAMPLES:");
-		Sys.println("  haxelib run redistHelper myGame.hxml");
-		Sys.println("  haxelib run redistHelper myGame.hxml docs/CHANGELOG.md docs/LICENSE");
-		Sys.println("  haxelib run redistHelper myGame.hxml docs/README@read_me.txt");
-		Sys.println("  haxelib run redistHelper myGame.hxml docs");
-		Sys.println("  haxelib run redistHelper myGame.hxml docs -ignore backups,*.zip");
-		Sys.println("  haxelib run redistHelper myGame.hxml -sign -pfx path/to/myCertificate.pfx");
-		Sys.println("");
-		Sys.println("OPTIONS:");
-		Sys.println("  -o <outputDir>: change the default redistHelper output dir (default: \"redist/\")");
-		Sys.println("  -p <projectName>: change the default project name (if not provided, it will use the name of the parent folder where this script is called)");
-		Sys.println("  -icon <iconFilePath>: replace EXE icon (only works for Windows and HL target)");
-		Sys.println("  -linux: package an Hashlink (HL) for Linux. This requires having an HXML using lib SDL");
-		Sys.println("  -hl32: when building Hashlink targets, this option will also package a 32bits version of the HL runtime in separate redist folders.");
-		Sys.println("  -zip: create a zip file for each build");
-		Sys.println("  -ignore <namesOrExtensions>: List of files to be ignored when copying extra directories (typically temp files or similar things). Names should be separated by a comma \",\", no space. To ignore file extensions, use the \"*.ext\" format. See examples.");
-		Sys.println("  -pak: generate a PAK file from the existing Heaps resource folder");
-		Sys.println("  -sign: code sign the executables using a PFX certificate. A password will be requested to use the certificate. If the -pfx argument is not provided, the PFX path will be looked up in the environment var CSC_LINK. The password will also be looked up in the environment var CSC_KEY_PASSWORD.");
-		Sys.println("  -pfx <pathToPfxFile>: Use provided PFX file to sign the executables (implies the use of -sign)");
-		Sys.println("  -h: show this help");
-		Sys.println("  -v: verbose mode (display more informations)");
-		Sys.println("");
-		Sys.println("NOTES:");
-		Sys.println("  - All specified \"Custom files\" will be copied in each redist folders (can be useful for README, LICENSE, etc.).");
-		Sys.println("  - You can specify folders to copy among \"Custom files\".");
-		Sys.println("  - Custom files can be renamed after copy, just add \"@\" followed by the final name after the file path. Example:");
-		Sys.println("      haxelib run redistHelper myGame.hxml docs/README@read_me.txt");
-		Sys.println("      The \"README\" file from docs/ will be renamed to \"read_me.txt\" in the target folder.");
-		Sys.println("");
-		Sys.exit(0);
-	}
-
-    public static function hasOption(opt:String) {
+	public static function hasOption(opt:String) {
 		return selectedOptions.contains(opt);
 	}
 
@@ -127,5 +87,23 @@ class Term {
 
 	public static function hasParam(p:String) {
 		return selectedParams[p] != null;
+	}
+
+    public static function usage() {
+		Sys.println("");
+		Sys.println("USAGE:");
+		Sys.println("  haxelib run hxdist <hxml1> [<hxml2>] [<hxml3>]");
+		Sys.println("");
+		Sys.println("OPTIONS:");
+		Sys.println("  -o <outputDir>: change the output dir (default: \"dist/\")");
+		Sys.println("  -p <projectName>: change the project name (if not provided, it will use the name of the project folder)");
+		Sys.println("  -icon <iconFilePath>: replace EXE icon (only works for Windows and HL target)");
+		Sys.println("  -zip: create a zip file for each build");
+		Sys.println("  -sign: code sign the executables using a PFX certificate. A password will be requested to use the certificate. If the -pfx argument is not provided, the PFX path will be looked up in the environment var CSC_LINK. The password will also be looked up in the environment var CSC_KEY_PASSWORD.");
+		Sys.println("  -pfx <pathToPfxFile>: Use provided PFX file to sign the executables (implies the use of -sign)");
+		Sys.println("  -h: show this help");
+		Sys.println("  -v: verbose mode (display more informations)");
+		Sys.println("");
+		Sys.exit(0);
 	}
 }

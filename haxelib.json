@@ -1,13 +1,15 @@
 {
   "name": "hxdist",
-  "url" : "https://github.com/csclydd/hxdist",
+  "url" : "https://github.com/csclyde/hxdist",
   "license": "Apache",
   "tags": ["Heaps","Hashlink","package","dist"],
   "description": "Creates distributable packages for Windows, Mac, and Linux",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "classPath": "src/",
   "releasenote": "First release",
   "contributors": ["csclyde", "sbenard"],
-  "dependencies": {},
+  "dependencies": {
+    "deepnightLibs":""
+  },
   "main": "Main"
 }

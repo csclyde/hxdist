@@ -3,8 +3,7 @@ import dn.FilePath;
 
 class FileUtil {
 	public static function initDistDir(d:String) {
-		if(Term.hasOption('verbose'))
-			Term.print("Initializing folder: " + d);
+		FilePath.SLASH_MODE = OnlySlashes;
 
 		try {
 			
@@ -19,6 +18,10 @@ class FileUtil {
 		catch(e:Dynamic) {
 			Term.error("Couldn't initialize dir " + d + ". Maybe it's in use or opened somewhere right now?");
 		}
+	}
+
+	public static function fromFile(p:String) {
+		return FilePath.fromFile(p);
 	}
 
     public static function createTextFile(path:String, content:String) {
