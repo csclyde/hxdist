@@ -71,15 +71,16 @@ class Target {
 		var toolFp = FileUtil.fromFile('$distDir/tools/$path');
 		toolFp.useSlashes();
 		var cmd = '"${toolFp.full}" ${args.join(" ")}';
-		if(Term.hasOption("verbose"))
-			Term.print("Executing tool: " + cmd);
+
+		Term.print("Executing tool: " + cmd);
 
 		// Use sys.io.Process instead of Sys.command because of quotes ("") bug
 		var p = new sys.io.Process(cmd);
 		var code = p.exitCode();
 		p.close();
-		if(Term.hasOption("verbose") && code != 0)
-			Term.print('  Failed with error code $code');
+		if(code != 0)
+			Term.warning('Failed with error code $code');
+		
 		return code;
 	}
 }

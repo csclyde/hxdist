@@ -70,7 +70,6 @@ class FileUtil {
 		var paths = [];
 
 		// Prioritize files from the RedistHelper folder
-		paths.push(distDir + "dist_files/hl_win/"); // HL 64bits
 		paths.push(distDir + "dist_files/");
 
 		// Locate haxe tools
