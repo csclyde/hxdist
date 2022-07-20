@@ -21,16 +21,11 @@ USAGE:
 FLAGS:
     -h Show tool usage
     -v Verbose output
-    -z Create .zip files for each platform
-    -win Build for Windows
-    -mac Build for MacOS
-    -linux Build for Linux
 PARAMS:
     [-p <project_name>] Defaults to the project folder name
     [-o <output_dir>] Defaults to /dist within your project folder
 EXAMPLES:
-    haxelib run hxdist -mac hashlink.hxml -o someFolder -p MyGreatGame
-    haxelib run hxdist -win -mac -linux -z hashlink.hxml flash.hxml webgl.hxml
+    haxelib run hxdist hashlink.hxml -o someFolder -p MyGreatGame
 ```
 
 ## Internal Info

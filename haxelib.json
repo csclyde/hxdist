@@ -4,9 +4,9 @@
   "license": "Apache",
   "tags": ["Heaps","Hashlink","package","dist"],
   "description": "Creates distributable packages for Windows, Mac, and Linux",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "classPath": "src/",
-  "releasenote": "First release",
+  "releasenote": "Improved HashLink script, added default zips and targets.",
   "contributors": ["csclyde", "sbenard"],
   "dependencies": {
     "deepnightLibs":""
