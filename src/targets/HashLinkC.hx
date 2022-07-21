@@ -40,12 +40,16 @@ class HashLinkC extends Target {
 
 		if(Sys.systemName() == 'Linux') {
 			Term.print("Current system: Linux.");
+
 			Term.print("Attempting linux build with gcc... ");
-			createPackage(hxmlContent, outputDir + '/hlc_linux', linuxFiles);
+			createPackageGcc(hxmlContent, outputDir + '/hlc_linux', linuxFiles);
+
+			// Term.print("Attempting windows build with MinGW-w64...");
+			// createPackageMinGW(hxmlContent, outputDir + '/hlc_win', winFiles);
 		}
 	}
 
-    function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
+    function createPackageGcc(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
 		FileUtil.createDirectory(packageDir);
 		FileUtil.initDistDir(packageDir);
 
@@ -65,6 +69,32 @@ class HashLinkC extends Target {
 			Term.print('Linux build finished.');
 		} else {
 			Term.print('Linux build failed.');
+		}
+
+		// Runtimes
+		copyRuntimeFiles(hxml, packageDir, files);
+	}
+
+	function createPackageMinGW(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
+		FileUtil.createDirectory(packageDir);
+		FileUtil.initDistDir(packageDir);
+
+		var result = runCommand('x86_64-w64-mingw32-gcc', [
+			'$sourceFile',
+			'-o',
+			'$packageDir/$projName',
+			// '-w',
+			'-std=c11',
+			'-I$sourceDir',
+			'-lhl /usr/local/lib/*.hdll',
+			'-lm',
+			'-lGL'
+		]);
+
+		if(result == 0) {
+			Term.print('Windows build finished.');
+		} else {
+			Term.print('Windows build failed.');
 		}
 
 		// Runtimes
