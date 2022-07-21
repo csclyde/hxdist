@@ -64,12 +64,18 @@ class Main {
 			var hxmlContent = FileUtil.parseHxml(projectDir, hxml);
 
 			// HL
-			if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0).length > 0) {
-
+			if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0 && c.indexOf(".hl") >= 0).length > 0) {
 				Term.print("Building for HashLink target...");
 				var target = new HashLink(distDir, projectDir, projectName);
 				target.compile(hxml, outputDir);
 			}
+			// HL/C
+			else if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0 && c.indexOf(".c") >= 0).length > 0) {
+				Term.print("Building for HashLink/C target...");
+				var target = new HashLinkC(distDir, projectDir, projectName);
+				target.compile(hxml, outputDir);
+			}
+		
 		}
 
 		FileUtil.cleanUpExit();

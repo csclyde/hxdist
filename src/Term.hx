@@ -73,6 +73,7 @@ class Term {
 
     public static function error(msg:Dynamic) {
 		Sys.println("ERROR - " + Std.string(msg));
+		Sys.println("Please make an issue for this at https://github.com/csclyde/hxdist/issues . I'll do my best to get it fixed. Thanks.");
 		FileUtil.cleanUpExit();
 		Sys.exit(1);
 	}

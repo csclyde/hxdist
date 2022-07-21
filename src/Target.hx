@@ -80,6 +80,16 @@ class Target {
 		p.close();
 		if(code != 0)
 			Term.warning('Failed with error code $code');
+
+		return code;
+	}
+
+	function runCommand(tool:String, args:Array<String>) : Int {
+		var cmd = '$tool ${args.join(" ")}';
+
+		var p = new sys.io.Process(cmd);
+		var code = p.exitCode();
+		p.close();
 		
 		return code;
 	}

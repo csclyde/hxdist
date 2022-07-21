@@ -1,60 +1,74 @@
 package targets;
 
+import haxe.io.Path;
 import Target.Platform;
 import sys.FileSystem;
 
-class HashLink extends Target {
+class HashLinkC extends Target {
     public function new(dd:String, pd: String, pn:String) {
         super(dd, pd, pn);
     }
 
+	var sourceFile = '';
+	var sourceDir = '';
+
     public override function compile(hxml:String, outputDir:String) {
+		Term.print("Generating HL/C source code...");
+
         if(Sys.command("haxe", [hxml]) != 0)
 			Term.error('Compilation failed!');
 
+		// the HL/C build process must work like this:
+		// - run the haxe command on the hxml file that has a .c target
+		// - grab the location of the .c file
+		// - try to compile the .c file into all systems
+		// - output the executables to the appropriate dist folder
+		// - move in all the shared libraries
+		// - zip it all up
+
         var hxmlContent = FileUtil.parseHxml(projDir, hxml);
 
-        createPackage(hxmlContent, outputDir + "/hl_win/", winFiles);
-        createPackage(hxmlContent, outputDir + "/hl_mac/", macFiles);
-        createPackage(hxmlContent, outputDir + "/hl_linux/", linuxFiles);
-
-		if(Sys.systemName() != 'Windows') {
-			Term.print("Updated the mac and linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac/' + projName]);
-			Sys.command('chmod', ['+x', outputDir + '/hl_linux/' + projName]);
+		for(line in hxmlContent) {
+			if(line.indexOf('-hl ') >= 0) {
+				sourceFile = line.split('-hl ')[1];
+				sourceDir = Path.directory(sourceFile);
+				Term.print('Found source file: $sourceFile');
+			}
 		}
 
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + "/hl_mac");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux");
+		var cwd = Sys.getCwd();
 
-		if(Sys.systemName() == 'Windows') {
-			Term.print('Updating execute permissions on Mac/Linux zip files...');
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.zip', projName]);
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_linux.zip', projName]);
+		if(Sys.systemName() == 'Linux') {
+			Term.print("Current system: Linux.");
+			Term.print("Attempting linux build with gcc... ");
+			createPackage(hxmlContent, outputDir + '/hlc_linux', linuxFiles);
 		}
 	}
 
     function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
-		Term.print("Packaging " + packageDir + "...");
-		FileUtil.initDistDir(packageDir);
 		FileUtil.createDirectory(packageDir);
+		FileUtil.initDistDir(packageDir);
+
+		var result = runCommand('gcc', [
+			'$sourceFile',
+			'-o',
+			'$packageDir/$projName',
+			'-w',
+			'-std=c11',
+			'-I$sourceDir',
+			'-lhl /usr/local/lib/*.hdll',
+			'-lm',
+			'-lGL'
+		]);
+
+		if(result == 0) {
+			Term.print('Linux build finished.');
+		} else {
+			Term.print('Linux build failed.');
+		}
 
 		// Runtimes
-		// var fileList = commonFiles.files.concat(files);
 		copyRuntimeFiles(hxml, packageDir, files);
-
-		// Copy HL bin file
-		var out = getHxmlParam(hxml, "-hl");
-		FileUtil.copy(out, packageDir + "/hlboot.dat");
-	}
-
-	var commonFiles:Target.RuntimeFiles = {
-		platform: null,
-		dir: 'dist_files/hl_common/',
-		files: [
-
-		]
 	}
 
     var winFiles : Target.RuntimeFiles = {
@@ -71,7 +85,6 @@ class HashLink extends Target {
 			{ f:"ui.hdll", lib:"heaps" },
 			{ f:"uv.hdll", lib:"heaps" },
 
-			{ f:"hl.exe", format:"$.exe" },
 			{ f:"libhl.dll" },
 			{ f:"msvcr120.dll" },
 			{ f:"msvcp120.dll" },
@@ -95,7 +108,6 @@ class HashLink extends Target {
 			{ f:"ui.hdll", lib:"heaps" },
 			{ f:"uv.hdll", lib:"heaps" },
 
-			{ f:"hl", format:"$" },
 			{ f:"libhl.dylib" },
 			{ f:"libpng16.16.dylib" }, // fmt
 			{ f:"libvorbis.0.dylib" }, // fmt
@@ -121,7 +133,6 @@ class HashLink extends Target {
 			{ f:"ui.hdll", lib:"heaps" },
 			{ f:"uv.hdll", lib:"heaps" },
 
-			{ f:"hl", format:"$" },
 			{ f:"libbsd.so.0" },
 			{ f:"libhl.so" },
 			{ f:"libmbedcrypto.so" },
