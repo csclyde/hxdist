@@ -1,14 +1,20 @@
+import haxe.io.Path;
+
 class FileUtil {
     public static function createDirectory(path:String) {
+		path = Path.normalize(path);
+
 		try {
 			sys.FileSystem.createDirectory(path);
 		}
 		catch(e:Dynamic) {
-			Term.error("Couldn't create directory "+path+". Maybe it's in use right now? ("+e+")");
+			Term.error("Couldn't create directory " + path + ". Maybe it's in use right now? (" + e + ")");
 		}
 	}
 
     public static function removeDirectory(path:String) {
+		path = Path.normalize(path);
+
 		if(!sys.FileSystem.exists(path)) {
 			return;
 		}
@@ -32,6 +38,9 @@ class FileUtil {
 	}
 
     public static function copyFile(from:String, to:String) {
+		from = Path.normalize(from);
+		to = Path.normalize(to);
+
 		try {
 			sys.io.File.copy(from, to);
 		}
@@ -41,6 +50,9 @@ class FileUtil {
 	}
 
     public static function zipFolder(zipPath:String, basePath:String) {
+		zipPath = Path.normalize(zipPath);
+		basePath = Path.normalize(basePath);
+
 		if(zipPath.indexOf(".zip") < 0)
 			zipPath += ".zip";
 

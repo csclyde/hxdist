@@ -36,13 +36,15 @@ class HashLinkC extends Target {
 			// createPackageMinGW(hxmlContent, outputDir + '/hlc_win', winFiles);
 		}
 		else if(Sys.systemName() == 'Windows') {
-			Term.warning("Windows HL/C build not yet implemented...");
+			// Term.warning("Windows HL/C build not yet implemented...");
+			Term.print("Attempting Windows build with MSVC... ");
+			createPackageMSVC(hxmlContent, outputDir + '/hlc_win', winFiles);
 		}
 		else if(Sys.systemName() == 'Mac') {
 			Term.warning("Mac HL/C build not yet implemented...");
 		}
 		else {
-			Term.error("Count not determine current system...");
+			Term.error("Could not determine current system...");
 		}
 	}
 
@@ -86,6 +88,30 @@ class HashLinkC extends Target {
 			'-lhl /usr/local/lib/*.hdll',
 			'-lm',
 			'-lGL'
+		]);
+
+		if(result == 0) {
+			Term.print('Windows build finished.');
+		} else {
+			Term.print('Windows build failed.');
+		}
+
+		// Runtimes
+		copyRuntimeFiles(hxml, packageDir, files);
+	}
+
+	function createPackageMSVC(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
+		Term.print("Packaging " + packageDir + "...");
+		FileUtil.createDirectory(packageDir);
+
+		// cl.exe /FeNecrovale.exe -I "C:\HaxeToolkit\hl\include" -I "bin/tmp" "bin/tmp/client.c" "C:\HaxeToolkit\hl\*.lib"
+		var result = runCommand('cl.exe', [
+			'$sourceFile',
+			'/Fe$packageDir/$projName.exe',
+			'-I"C:/HaxeToolkit/hl/include"',
+			'-I"$sourceDir"',
+			'$sourceFile',
+			'"C:/HaxeToolkit/hl/*.lib"',
 		]);
 
 		if(result == 0) {

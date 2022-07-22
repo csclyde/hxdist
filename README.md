@@ -10,7 +10,7 @@ A program to package Haxe applications for distribution.
 ## Current Targets
 
 - HashLink bytecode: Windows, Mac, Linux
-- HashLink/C compiled executable: Linux
+- HashLink/C compiled executable: Windows, Linux
 - JavaScript: Web
 
 ## Current Libraries

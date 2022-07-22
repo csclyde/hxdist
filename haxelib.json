@@ -4,9 +4,9 @@
   "license": "Apache",
   "tags": ["Heaps","Hashlink","package","dist"],
   "description": "Creates distributable packages for Windows, Mac, and Linux",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "classPath": "src/",
-  "releasenote": "Removed DeepNight dependencies",
+  "releasenote": "Added HL/C support to windows",
   "contributors": ["csclyde"],
   "dependencies": {},
   "main": "Main"

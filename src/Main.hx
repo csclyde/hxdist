@@ -1,3 +1,4 @@
+import haxe.io.Path;
 import FileUtil;
 import targets.*;
 
@@ -19,7 +20,7 @@ class Main {
 		zipping = Term.hasOption("zip");
 
 		// Set CWD to the directory haxelib was called
-		distDir = Sys.getCwd();
+		distDir = Path.normalize(Sys.getCwd());
 		projectDir = Term.projectDir; 
 		
 		if(verbose) {

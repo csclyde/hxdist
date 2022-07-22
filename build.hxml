@@ -1,5 +1,4 @@
 -cp src
--lib deepnightLibs
 
 -dce full
 -main Main

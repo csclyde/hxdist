@@ -1,3 +1,5 @@
+import haxe.io.Path;
+
 typedef RuntimeFiles = {
 	var platform: Platform;
 	var dir:String;
@@ -30,14 +32,17 @@ class Target {
 	public function compile(hxml:String, outputDir:String) {}
 
     function copyRuntimeFiles(hxml:Array<String>, targetDir:String, runTimeFiles:RuntimeFiles) {
+		targetDir = Path.normalize(targetDir);
+		runTimeFiles.dir = Path.normalize(runTimeFiles.dir);
+
 		Term.print("Packaging " + targetDir + "...");
 
 		for(r in runTimeFiles.files) {
 			if(r.lib != null && !hxmlRequiresLib(hxml, r.lib)) continue;
 
 			var outputName = (r.format == null) ? r.f : StringTools.replace(r.format, "$", projName);
-			var from = distDir + runTimeFiles.dir + r.f;
-			var to = targetDir + "/" + outputName;
+			var from = distDir + '/' + runTimeFiles.dir + '/' + r.f;
+			var to = targetDir + '/' + outputName;
 			
 			if(Term.hasOption('verbose')) {
 				Term.print(" -> Copying " + r.f + (r.lib == null ? "" : " [required by " + r.lib + "]"));
@@ -100,7 +105,10 @@ class Target {
 	}
 
 	public static function parseHxml(dir:String, f:String): Array<String> {
-		var lines = sys.io.File.getContent(dir + f).split('\n');
+		dir = Path.normalize(dir);
+		f = Path.normalize(f);
+
+		var lines = sys.io.File.getContent(dir + '/' + f).split('\n');
 		var finalLines = [];
 
 		for(line in lines) {
