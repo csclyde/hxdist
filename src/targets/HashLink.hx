@@ -107,46 +107,59 @@ class HashLink extends Target {
 		platform: Linux,
         dir: 'dist_files/hl_linux/',
 		files: [
-			// common
-			{ f:"fmt.hdll" },
-			{ f:"ssl.hdll" },
-			{ f:"mysql.hdll" },
-			
+			// HashLink binary
 			{ f:"hl", format:"$" },
-			{ f:"libbsd.so.0" },
 			{ f:"libhl.so" },
-			{ f:"libmbedcrypto.so" },
-			{ f:"libmbedcrypto.so.0" },
-			{ f:"libmbedcrypto.so.2.2.1" },
-			{ f:"libmbedtls.so" },
-			{ f:"libmbedtls.so.10" },
-			{ f:"libmbedtls.so.2.2.1" },
-			{ f:"libmbedx509.so" },
-			{ f:"libmbedx509.so.0" },
-			{ f:"libmbedx509.so.2.2.1" },
-			{ f:"libogg.so.0" },
-			{ f:"libopenal.so.1" },
-			{ f:"libpng16.so.16" },
-			{ f:"libsndio.so" },
-			{ f:"libsndio.so.6.1" },
-			
-			{ f:"libturbojpeg.so.0" },
-			{ f:"libuv.so.1" },
-			{ f:"libvorbis.so.0" },
-			{ f:"libvorbisfile.so.3" },
+			{ f:"mysql.hdll" },
 
-			{ f:"openal.hdll", lib:"heaps" },
-			{ f:"ui.hdll", lib:"heaps" },
-			{ f:"uv.hdll", lib:"heaps" },
+			{ f:"ssl.hdll" },
+			{ f:"libmbedtls.so.10" },
+			{ f:"libmbedx509.so.0" },
+			{ f:"libmbedcrypto.so.0" },
+
+			// FMT
+			{ lib:"heaps", f:"fmt.hdll" },
+			{ lib:"heaps", f:"libpng16.so.16" },
+			{ lib:"heaps", f:"libturbojpeg.so.0" }, 
+			{ lib:"heaps", f:"libvorbisfile.so.3" },
+			{ lib:"heaps", f:"libvorbis.so.0" },
+			{ lib:"heaps", f:"libogg.so.0" },
+
+			// openAL
+			{ lib:"heaps", f:"openal.hdll" },
+			{ lib:"heaps", f:"libopenal.so.1" },
+
+			// UI
+			{ lib:"heaps", f:"ui.hdll" },
+
+			// UV
+			{ lib:"heaps", f:"uv.hdll" },
+			{ lib:"heaps", f:"libuv.so.1" },
+
+			// SDL
+			{ lib:"hlsdl", f:"sdl.hdll" },
+			{ lib:"hlsdl", f:"libSDL2-2.0.so.0" },
+			{ lib:"hlsdl", f:"libsndio.so.6.1" },
+
+			// Steam
+			{ lib:"hlsteam", f:"steam.hdll" },
+            { lib:"hlsteam", f:"libsteam_api.so" },
+
+
 			
-			{ f:"sdl.hdll", lib:"hlsdl" },
-			{ f:"libSDL2-2.0.so", lib:"hlsdl" },
-			{ f:"libSDL2-2.0.so.0", lib:"hlsdl" },
-			{ f:"libSDL2-2.0.so.0.4.0", lib:"hlsdl" },
-			{ f:"libSDL2.so", lib:"hlsdl" },
+			// { f:"libbsd.so.0" },
+			// { f:"libmbedcrypto.so" },
+			// { f:"libmbedcrypto.so.2.2.1" },
+			// { f:"libmbedtls.so" },
+			// { f:"libmbedtls.so.2.2.1" },
+			// { f:"libmbedx509.so" },
+			// { f:"libmbedx509.so.2.2.1" },
+			// { f:"libsndio.so" },
 			
-			{ f:"steam.hdll", lib:"hlsteam" },
-            { f:"libsteam_api.so", lib:"hlsteam" },
+			// { f:"libSDL2-2.0.so", lib:"hlsdl" },
+			// { f:"libSDL2-2.0.so.0.4.0", lib:"hlsdl" },
+			// { f:"libSDL2.so", lib:"hlsdl" },
+			
 		],
 	}
 }
