@@ -27,10 +27,3 @@ PARAMS:
 EXAMPLES:
     haxelib run hxdist hashlink.hxml -o someFolder -p MyGreatGame
 ```
-
-## Internal Info
-
-Working gcc command
-```
-gcc -o bin/Necrovale -std=c11 -I bin/tmp/ bin/tmp/client.c -lhl /usr/local/lib/*.hdll -lm -lGL
-```

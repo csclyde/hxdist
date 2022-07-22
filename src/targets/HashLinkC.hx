@@ -39,13 +39,20 @@ class HashLinkC extends Target {
 		var cwd = Sys.getCwd();
 
 		if(Sys.systemName() == 'Linux') {
-			Term.print("Current system: Linux.");
-
-			Term.print("Attempting linux build with gcc... ");
+			Term.print("Attempting Linux build with gcc... ");
 			createPackageGcc(hxmlContent, outputDir + '/hlc_linux', linuxFiles);
 
 			// Term.print("Attempting windows build with MinGW-w64...");
 			// createPackageMinGW(hxmlContent, outputDir + '/hlc_win', winFiles);
+		}
+		else if(Sys.systemName() == 'Windows') {
+			Term.warning("Windows HL/C build not yet implemented...");
+		}
+		else if(Sys.systemName() == 'Mac') {
+			Term.warning("Mac HL/C build not yet implemented...");
+		}
+		else {
+			Term.error("Count not determine current system...");
 		}
 	}
 
@@ -65,14 +72,14 @@ class HashLinkC extends Target {
 			'-lGL'
 		]);
 
-		if(result == 0) {
-			Term.print('Linux build finished.');
-		} else {
-			Term.print('Linux build failed.');
-		}
-
 		// Runtimes
 		copyRuntimeFiles(hxml, packageDir, files);
+		
+		if(result == 0) {
+			Term.print('Linux build successfull!');
+		} else {
+			Term.error('Linux build failed...');
+		}
 	}
 
 	function createPackageMinGW(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
