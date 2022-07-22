@@ -1,8 +1,6 @@
 package targets;
 
 import haxe.io.Path;
-import Target.Platform;
-import sys.FileSystem;
 
 class HashLinkC extends Target {
     public function new(dd:String, pd: String, pn:String) {

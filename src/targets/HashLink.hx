@@ -1,7 +1,5 @@
 package targets;
 
-import Target.Platform;
-
 class HashLink extends Target {
     public function new(dd:String, pd: String, pn:String) {
         super(dd, pd, pn);
@@ -113,12 +111,7 @@ class HashLink extends Target {
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
-			{ f:"sdl.hdll", lib:"hlsdl" },
-			{ f:"steam.hdll", lib:"hlsteam" },
-			{ f:"openal.hdll", lib:"heaps" },
-			{ f:"ui.hdll", lib:"heaps" },
-			{ f:"uv.hdll", lib:"heaps" },
-
+			
 			{ f:"hl", format:"$" },
 			{ f:"libbsd.so.0" },
 			{ f:"libhl.so" },
@@ -136,17 +129,23 @@ class HashLink extends Target {
 			{ f:"libpng16.so.16" },
 			{ f:"libsndio.so" },
 			{ f:"libsndio.so.6.1" },
-
+			
 			{ f:"libturbojpeg.so.0" },
 			{ f:"libuv.so.1" },
 			{ f:"libvorbis.so.0" },
 			{ f:"libvorbisfile.so.3" },
 
+			{ f:"openal.hdll", lib:"heaps" },
+			{ f:"ui.hdll", lib:"heaps" },
+			{ f:"uv.hdll", lib:"heaps" },
+			
+			{ f:"sdl.hdll", lib:"hlsdl" },
 			{ f:"libSDL2-2.0.so", lib:"hlsdl" },
 			{ f:"libSDL2-2.0.so.0", lib:"hlsdl" },
 			{ f:"libSDL2-2.0.so.0.4.0", lib:"hlsdl" },
 			{ f:"libSDL2.so", lib:"hlsdl" },
-
+			
+			{ f:"steam.hdll", lib:"hlsteam" },
             { f:"libsteam_api.so", lib:"hlsteam" },
 		],
 	}

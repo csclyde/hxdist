@@ -9,7 +9,10 @@ class FileUtil {
 	}
 
     public static function removeDirectory(path:String) {
-		if(!sys.FileSystem.exists(path) || !sys.FileSystem.isDirectory(path)) {
+		if(!sys.FileSystem.exists(path)) {
+			return;
+		}
+		else if(!sys.FileSystem.isDirectory(path)) {
 			Term.warning("Tried to delete directory (" + path + ") which isn't a directory.");
 			return;
 		}
