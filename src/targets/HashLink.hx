@@ -1,7 +1,6 @@
 package targets;
 
 import Target.Platform;
-import sys.FileSystem;
 
 class HashLink extends Target {
     public function new(dd:String, pd: String, pn:String) {
@@ -12,7 +11,7 @@ class HashLink extends Target {
         if(Sys.command("haxe", [hxml]) != 0)
 			Term.error('Compilation failed!');
 
-        var hxmlContent = FileUtil.parseHxml(projDir, hxml);
+        var hxmlContent = Target.parseHxml(projDir, hxml);
 
         createPackage(hxmlContent, outputDir + "/hl_win/", winFiles);
         createPackage(hxmlContent, outputDir + "/hl_mac/", macFiles);
@@ -37,7 +36,6 @@ class HashLink extends Target {
 
     function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
 		Term.print("Packaging " + packageDir + "...");
-		FileUtil.initDistDir(packageDir);
 		FileUtil.createDirectory(packageDir);
 
 		// Runtimes
@@ -46,7 +44,7 @@ class HashLink extends Target {
 
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
-		FileUtil.copy(out, packageDir + "/hlboot.dat");
+		FileUtil.copyFile(out, packageDir + "/hlboot.dat");
 	}
 
 	var commonFiles:Target.RuntimeFiles = {

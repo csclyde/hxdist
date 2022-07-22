@@ -9,16 +9,15 @@ class JavaScript extends Target {
         if(Sys.command("haxe", [hxml]) != 0)
 			Term.error('Compilation failed!');
 
-        var hxmlContent = FileUtil.parseHxml(projDir, hxml);
+        var hxmlContent = Target.parseHxml(projDir, hxml);
 
-        createPackage(hxmlContent, outputDir + "/js/", files);
+        createPackage(hxmlContent, outputDir + "/js_web/", files);
 
-		FileUtil.zipFolder(outputDir + '/${projName}_js.zip', outputDir + "/js");
+		FileUtil.zipFolder(outputDir + '/${projName}_js_web.zip', outputDir + "/js_web/");
 	}
 
     function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
 		Term.print("Packaging " + packageDir + "...");
-		FileUtil.initDistDir(packageDir);
 		FileUtil.createDirectory(packageDir);
 
 		// Runtimes
@@ -26,12 +25,12 @@ class JavaScript extends Target {
 
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-js");
-		FileUtil.copy(out, packageDir + "/game.js");
+		FileUtil.copyFile(out, packageDir + "/game.js");
 	}
 
     var files : Target.RuntimeFiles = {
 		platform: null,
-        dir: 'dist_files/js/',
+        dir: 'dist_files/js_web/',
 		files: [
 			// common
 			{ f:"index.html" },

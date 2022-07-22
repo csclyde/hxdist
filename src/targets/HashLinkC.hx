@@ -26,7 +26,7 @@ class HashLinkC extends Target {
 		// - move in all the shared libraries
 		// - zip it all up
 
-        var hxmlContent = FileUtil.parseHxml(projDir, hxml);
+        var hxmlContent = Target.parseHxml(projDir, hxml);
 
 		for(line in hxmlContent) {
 			if(line.indexOf('-hl ') >= 0) {
@@ -57,8 +57,8 @@ class HashLinkC extends Target {
 	}
 
     function createPackageGcc(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
+		Term.print("Packaging " + packageDir + "...");
 		FileUtil.createDirectory(packageDir);
-		FileUtil.initDistDir(packageDir);
 
 		var result = runCommand('gcc', [
 			'$sourceFile',
@@ -83,8 +83,8 @@ class HashLinkC extends Target {
 	}
 
 	function createPackageMinGW(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
+		Term.print("Packaging " + packageDir + "...");
 		FileUtil.createDirectory(packageDir);
-		FileUtil.initDistDir(packageDir);
 
 		var result = runCommand('x86_64-w64-mingw32-gcc', [
 			'$sourceFile',

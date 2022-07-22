@@ -30,18 +30,24 @@ class Target {
 	public function compile(hxml:String, outputDir:String) {}
 
     function copyRuntimeFiles(hxml:Array<String>, targetDir:String, runTimeFiles:RuntimeFiles) {
+		Term.print("Packaging " + targetDir + "...");
+
 		for(r in runTimeFiles.files) {
 			if(r.lib != null && !hxmlRequiresLib(hxml, r.lib)) continue;
 
 			var outputName = (r.format == null) ? r.f : StringTools.replace(r.format, "$", projName);
-			var from = FileUtil.findFile(distDir, runTimeFiles.dir + r.f);
+			var from = distDir + runTimeFiles.dir + r.f;
 			var to = targetDir + "/" + outputName;
 			
-			Term.print(" -> Copying " + r.f + (r.lib == null ? "" : " [required by " + r.lib + "]"));
-			if(r.format != null) Term.print(" -> Renaming " + r.f + " to " + outputName);
+			if(Term.hasOption('verbose')) {
+				Term.print(" -> Copying " + r.f + (r.lib == null ? "" : " [required by " + r.lib + "]"));
+				if(r.format != null) Term.print(" -> Renaming " + r.f + " to " + outputName);
+			}
 			
-			FileUtil.copy(from, to);
+			FileUtil.copyFile(from, to);
 		}
+
+		Term.print("Created " + targetDir);
 	}
 
     function hxmlRequiresLib(hxml:Array<String>, libId:String) : Bool {
@@ -68,9 +74,8 @@ class Target {
 	}
 
 	function runTool(path:String, args:Array<String>) : Int {
-		var toolFp = FileUtil.fromFile('$distDir/tools/$path');
-		toolFp.useSlashes();
-		var cmd = '"${toolFp.full}" ${args.join(" ")}';
+		var toolFp = '$distDir/tools/$path';
+		var cmd = '"${toolFp}" ${args.join(" ")}';
 
 		Term.print("Executing tool: " + cmd);
 
@@ -92,5 +97,24 @@ class Target {
 		p.close();
 		
 		return code;
+	}
+
+	public static function parseHxml(dir:String, f:String): Array<String> {
+		var lines = sys.io.File.getContent(dir + f).split('\n');
+		var finalLines = [];
+
+		for(line in lines) {
+			if(line == '') continue;
+
+			line = StringTools.trim(line.split('#')[0]);
+
+			if(line.indexOf(".hxml") >= 0 && line.indexOf("-cmd") < 0) {
+				finalLines = finalLines.concat(parseHxml(dir, line));
+			} else {
+				finalLines.push(line);
+			}
+		}
+
+		return finalLines;
 	}
 }

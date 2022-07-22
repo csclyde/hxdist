@@ -1,4 +1,3 @@
-import dn.Log.LogEntry;
 import FileUtil;
 import targets.*;
 
@@ -20,8 +19,8 @@ class Main {
 		zipping = Term.hasOption("zip");
 
 		// Set CWD to the directory haxelib was called
-		distDir = FileUtil.cleanUpDirPath(Sys.getCwd());
-		projectDir = FileUtil.cleanUpDirPath(Term.projectDir); // call directory is passed as the last param in haxelibs
+		distDir = Sys.getCwd();
+		projectDir = Term.projectDir; 
 		
 		if(verbose) {
 			Term.print("hxdist Dir = " + distDir);
@@ -56,13 +55,12 @@ class Main {
 		}
 
 		// Prepare base folder
-		FileUtil.initDistDir(outputDir);
-
+		FileUtil.removeDirectory(outputDir);
 
 		// Parse HXML files given as parameters
 		for(hxml in Term.hxmlPaths) {
 			Term.print("Parsing " + hxml + "...");
-			var hxmlContent = FileUtil.parseHxml(projectDir, hxml);
+			var hxmlContent = Target.parseHxml(projectDir, hxml);
 
 			// HL
 			if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0 && c.indexOf(".hl") >= 0).length > 0) {

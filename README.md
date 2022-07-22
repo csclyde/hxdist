@@ -1,11 +1,29 @@
 # About
 
-A program to package Haxe applications for distribution. Based off of redistHelper by Sébastien Bénard (https://github.com/deepnight/redistHelper).
+A program to package Haxe applications for distribution. 
 
-For now, hxdist only targets HashLink apps. For those, it will create Win/Mac/Linux packages with all the required library files, the HashLink executable, and a build of the project. I set it up so that additional targets should be easy to add in the future. Feel free to request them, or create a PR for them if you can.
+- Thanks to Sébastien Bénard for redistHelper, which this tool is based off of (https://github.com/deepnight/redistHelper).
+- Thanks to Ronnie Hedlund for making a tool to give Linux/Mac zip files the correct execute permissions (https://sourceforge.net/p/galaxyv2/code/HEAD/tree/other/zip_exec/zip_exec.cpp)
 
-Thanks to Ronnie Hedlund for making a tool to give Linux/Mac zip files the correct execute permissions.
-https://sourceforge.net/p/galaxyv2/code/HEAD/tree/other/zip_exec/zip_exec.cpp
+# Targets
+
+## Current Targets
+
+- HashLink bytecode: Windows, Mac, Linux
+- HashLink/C compiled executable: Linux
+- JavaScript: Web
+
+## Current Libraries
+
+- Heaps.io
+- SDL
+
+## Future Targets
+
+- HashLink/C compiled executable: Windows, Mac
+- HashLink/C cross compilation from all platforms to all platforms
+- OpenFL
+- HaxeFlixel
 
 # Install
 
