@@ -151,24 +151,27 @@ class HashLinkC extends Target {
 		platform: Mac,
         dir: 'dist_files/hl_mac/',
 		files: [
-			// common
-			{ f:"fmt.hdll" },
-			{ f:"ssl.hdll" },
+			{ f:"libhl.dylib" },
 			{ f:"mysql.hdll" },
+
+			{ f:"fmt.hdll" },
+			{ f:"libpng16.16.dylib" },
+			{ f:"libvorbis.0.dylib" },
+			{ f:"libvorbisfile.3.dylib" },
+
+			{ f:"ssl.hdll" },
+			{ f:"libmbedtls.10.dylib" },
+
 			{ f:"sdl.hdll", lib:"hlsdl" },
-			{ f:"steam.hdll", lib:"hlsteam" },
-			{ f:"openal.hdll", lib:"heaps" },
+			{ f:"libSDL2-2.0.0.dylib", lib:"hlsdl" },
+			
 			{ f:"ui.hdll", lib:"heaps" },
 			{ f:"uv.hdll", lib:"heaps" },
-
-			{ f:"libhl.dylib" },
-			{ f:"libpng16.16.dylib" }, // fmt
-			{ f:"libvorbis.0.dylib" }, // fmt
-			{ f:"libvorbisfile.3.dylib" }, // fmt
-			{ f:"libmbedtls.10.dylib" }, // SSL
+			{ f:"openal.hdll", lib:"heaps" },
 			{ f:"libuv.1.dylib", lib:"heaps" },
 			{ f:"libopenal.1.dylib", lib:"heaps" },
-			{ f:"libSDL2-2.0.0.dylib", lib:"hlsdl" },
+
+			{ f:"steam.hdll", lib:"hlsteam" },
 		],
 	}
 

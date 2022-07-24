@@ -12,22 +12,22 @@ class HashLink extends Target {
         var hxmlContent = Target.parseHxml(projDir, hxml);
 
         createPackage(hxmlContent, outputDir + "/hl_win/", winFiles);
-        createPackage(hxmlContent, outputDir + "/hl_mac/", macFiles);
+        createPackage(hxmlContent, outputDir + "/hl_mac.app/", macFiles);
         createPackage(hxmlContent, outputDir + "/hl_linux/", linuxFiles);
 
 		if(Sys.systemName() != 'Windows') {
 			Term.print("Updated the mac and linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac/' + projName]);
+			Sys.command('chmod', ['+x', outputDir + '/hl_mac.app/' + projName]);
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/' + projName]);
 		}
 
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + "/hl_mac");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux");
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.app.zip', outputDir + "/hl_mac.app/");
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
 
 		if(Sys.systemName() == 'Windows') {
 			Term.print('Updating execute permissions on Mac/Linux zip files...');
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.zip', projName]);
+			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.app.zip', projName]);
 			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_linux.zip', projName]);
 		}
 	}
@@ -42,7 +42,12 @@ class HashLink extends Target {
 
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
-		FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+
+		if(files == macFiles) {
+			FileUtil.copyFile(out, packageDir + "Contents/MacOS/hlboot.dat");
+		} else {
+			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+		}
 	}
 
 	var commonFiles:Target.RuntimeFiles = {
@@ -81,25 +86,29 @@ class HashLink extends Target {
 		platform: Mac,
         dir: 'dist_files/hl_mac/',
 		files: [
-			// common
-			{ f:"fmt.hdll" },
-			{ f:"ssl.hdll" },
-			{ f:"mysql.hdll" },
-			{ f:"sdl.hdll", lib:"hlsdl" },
-			{ f:"steam.hdll", lib:"hlsteam" },
-			{ f:"openal.hdll", lib:"heaps" },
-			{ f:"ui.hdll", lib:"heaps" },
-			{ f:"uv.hdll", lib:"heaps" },
+			{ f:"hl", format:"$", d: "Contents/MacOS/"},
+			{ f:"Info.plist", d: "Contents/" },
+			{ f:"libhl.dylib", d: "Contents/MacOS/" },
+			{ f:"mysql.hdll", d: "Contents/MacOS/" },
 
-			{ f:"hl", format:"$" },
-			{ f:"libhl.dylib" },
-			{ f:"libpng16.16.dylib" }, // fmt
-			{ f:"libvorbis.0.dylib" }, // fmt
-			{ f:"libvorbisfile.3.dylib" }, // fmt
-			{ f:"libmbedtls.10.dylib" }, // SSL
-			{ f:"libuv.1.dylib", lib:"heaps" },
-			{ f:"libopenal.1.dylib", lib:"heaps" },
-			{ f:"libSDL2-2.0.0.dylib", lib:"hlsdl" },
+			{ f:"fmt.hdll", d: "Contents/MacOS/" },
+			{ f:"libpng16.16.dylib", d: "Contents/MacOS/" },
+			{ f:"libvorbis.0.dylib", d: "Contents/MacOS/" },
+			{ f:"libvorbisfile.3.dylib", d: "Contents/MacOS/" },
+
+			{ f:"ssl.hdll", d: "Contents/MacOS/" },
+			{ f:"libmbedtls.10.dylib", d: "Contents/MacOS/" },
+
+			{ lib:"hlsdl", f:"sdl.hdll", d: "Contents/MacOS/" },
+			{ lib:"hlsdl", f:"libSDL2-2.0.0.dylib", d: "Contents/MacOS/" },
+			
+			{ lib:"heaps", f:"ui.hdll", d: "Contents/MacOS/" },
+			{ lib:"heaps", f:"uv.hdll", d: "Contents/MacOS/" },
+			{ lib:"heaps", f:"openal.hdll", d: "Contents/MacOS/" },
+			{ lib:"heaps", f:"libuv.1.dylib", d: "Contents/MacOS/" },
+			{ lib:"heaps", f:"libopenal.1.dylib", d: "Contents/MacOS/" },
+
+			{ lib:"hlsteam", f:"steam.hdll", d: "Contents/MacOS/" },
 		],
 	}
 

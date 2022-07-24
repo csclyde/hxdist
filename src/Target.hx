@@ -1,3 +1,4 @@
+import sys.FileSystem;
 import haxe.io.Path;
 
 typedef RuntimeFiles = {
@@ -9,6 +10,7 @@ typedef RuntimeFiles = {
 typedef RuntimeFile = {
 	var ?lib: Null<String>;
 	var f: String;
+	var ?d: String;
 	var ?format: String;
 }
 
@@ -42,11 +44,18 @@ class Target {
 
 			var outputName = (r.format == null) ? r.f : StringTools.replace(r.format, "$", projName);
 			var from = distDir + '/' + runTimeFiles.dir + '/' + r.f;
-			var to = targetDir + '/' + outputName;
+
+			var fullOutputDir = targetDir + '/' + (r.d != null ? r.d : '');
+
+			if(!FileSystem.exists(fullOutputDir)) {
+				FileUtil.createDirectory(fullOutputDir);
+			}
+			
+			var to = fullOutputDir + outputName;
 			
 			if(Term.hasOption('verbose')) {
 				Term.print(" -> Copying " + r.f + (r.lib == null ? "" : " [required by " + r.lib + "]"));
-				if(r.format != null) Term.print(" -> Renaming " + r.f + " to " + outputName);
+				if(r.format != null) Term.print(" -> Renaming " + r.f + " to " + to);
 			}
 			
 			FileUtil.copyFile(from, to);
