@@ -5,7 +5,7 @@
   <key>CFBundleGetInfoString</key>
   <string>$PROJ_NAME</string>
   <key>CFBundleExecutable</key>
-  <string>$EXE_LOC</string>
+  <string>$PROJ_NAME</string>
   <key>CFBundleIdentifier</key>
   <string>Haxe Developer</string>
   <key>CFBundleName</key>

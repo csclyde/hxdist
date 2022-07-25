@@ -12,22 +12,22 @@ class HashLink extends Target {
         var hxmlContent = Target.parseHxml(projDir, hxml);
 
         createPackage(hxmlContent, outputDir + "/hl_win/", winFiles);
-        createPackage(hxmlContent, outputDir + "/hl_mac.app/", macFiles);
+        createPackage(hxmlContent, outputDir + '/hl_mac/$projName.app/', macFiles);
         createPackage(hxmlContent, outputDir + "/hl_linux/", linuxFiles);
 
 		if(Sys.systemName() != 'Windows') {
 			Term.print("Updated the mac and linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac.app/' + projName]);
+			Sys.command('chmod', ['+x', outputDir + '/hl_mac/$projName.app/Contents/MacOS/' + projName]);
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/' + projName]);
 		}
 
 		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.app.zip', outputDir + "/hl_mac.app/");
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + '/hl_mac/');
 		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
 
 		if(Sys.systemName() == 'Windows') {
 			Term.print('Updating execute permissions on Mac/Linux zip files...');
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.app.zip', projName]);
+			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.app.zip', '$projName.app/Contents/MacOS/$projName']);
 			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_linux.zip', projName]);
 		}
 	}
@@ -36,15 +36,19 @@ class HashLink extends Target {
 		Term.print("Packaging " + packageDir + "...");
 		FileUtil.createDirectory(packageDir);
 
-		// Runtimes
-		// var fileList = commonFiles.files.concat(files);
 		copyRuntimeFiles(hxml, packageDir, files);
-
+		
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
-
+		
+		// we need some special junk done on mac
 		if(files == macFiles) {
-			FileUtil.copyFile(out, packageDir + "Contents/MacOS/hlboot.dat");
+			FileUtil.copyFile(out, packageDir + 'Contents/MacOS/hlboot.dat');
+
+			Term.print("Updating Info.plist with project variables...");
+			var infoData = sys.io.File.getContent(packageDir + 'Contents/Info.plist');
+			infoData = StringTools.replace(infoData, "$PROJ_NAME", projName);
+			sys.io.File.saveContent(packageDir + 'Contents/Info.plist', infoData);
 		} else {
 			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
 		}
