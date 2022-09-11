@@ -21,7 +21,8 @@ class Main {
 
 		// Set CWD to the directory haxelib was called
 		distDir = Path.normalize(Sys.getCwd());
-		projectDir = Term.projectDir; 
+		projectDir = Path.normalize(Term.projectDir);
+		projectDir = Path.removeTrailingSlashes(projectDir);
 		
 		if(verbose) {
 			Term.print("hxdist Dir = " + distDir);
@@ -44,7 +45,8 @@ class Main {
 
 		if(projectName == null) {
 			var split = projectDir.split("/");
-			projectName = split[split.length - 2];
+			projectName = split[split.length - 1];
+
 		}
 
 		Term.print("Project name: " + projectName);
