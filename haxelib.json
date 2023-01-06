@@ -4,9 +4,9 @@
   "license": "Apache",
   "tags": ["Heaps","Hashlink","package","dist"],
   "description": "Creates distributable packages for Windows, Mac, and Linux",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "classPath": "src/",
-  "releasenote": "Added HL/C support to windows",
+  "releasenote": "Fixed bug with project name",
   "contributors": ["csclyde"],
   "dependencies": {},
   "main": "Main"
