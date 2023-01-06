@@ -11,14 +11,14 @@ class HashLink extends Target {
 
         var hxmlContent = Target.parseHxml(projDir, hxml);
 
-        createPackage(hxmlContent, outputDir + "/hl_win/", winFiles);
-        createPackage(hxmlContent, outputDir + '/hl_mac/$projName.app/', macFiles);
-        createPackage(hxmlContent, outputDir + "/hl_linux/", linuxFiles);
+        createPackage(hxmlContent, outputDir + 'hl_win/${projName}/', winFiles);
+        createPackage(hxmlContent, outputDir + '/hl_mac/${projName}/$projName.app/', macFiles);
+        createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
 
 		if(Sys.systemName() != 'Windows') {
 			Term.print("Updated the mac and linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac/$projName.app/Contents/MacOS/' + projName]);
-			Sys.command('chmod', ['+x', outputDir + '/hl_linux/' + projName]);
+			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
+			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
 		}
 
 		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
