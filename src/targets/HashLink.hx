@@ -11,7 +11,7 @@ class HashLink extends Target {
 
         var hxmlContent = Target.parseHxml(projDir, hxml);
 
-        createPackage(hxmlContent, outputDir + 'hl_win/${projName}/', winFiles);
+        createPackage(hxmlContent, outputDir + '/hl_win/${projName}/', winFiles);
         createPackage(hxmlContent, outputDir + '/hl_mac/${projName}/$projName.app/', macFiles);
         createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
 
