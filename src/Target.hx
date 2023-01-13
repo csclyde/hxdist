@@ -61,6 +61,11 @@ class Target {
 			FileUtil.copyFile(from, to);
 		}
 
+		// for steam, grab the appid
+		if(hxmlRequiresLib(hxml, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
+			FileUtil.copyFile(projDir + '/steam_appid.txt', targetDir + '/steam_appid.txt');
+		}
+
 		Term.print("Created " + targetDir);
 	}
 
