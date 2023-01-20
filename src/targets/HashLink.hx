@@ -78,7 +78,9 @@ class HashLink extends Target {
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
+			{ f:"hlimgui.hdll" },
 			{ f:"sdl.hdll", lib:"hlsdl" },
+			{ f:"directx.hdll", lib:"hldx" },
 			{ f:"steam.hdll", lib:"hlsteam" },
 			{ f:"openal.hdll", lib:"heaps" },
 			{ f:"ui.hdll", lib:"heaps" },
@@ -88,6 +90,11 @@ class HashLink extends Target {
 			{ f:"libhl.dll" },
 			{ f:"msvcr120.dll" },
 			{ f:"msvcp120.dll" },
+			{ f:"libmbedcrypto.dll" },
+			{ f:"libmbedtls.dll" },
+			{ f:"libmbedx509.dll" },
+			{ f:"libpcre-1.dll" },
+			{ f:"zlib1.dll" },
 			{ f:"OpenAL32.dll", lib:"heaps" },
 			{ f:"SDL2.dll", lib:"hlsdl" },
 			{ f:"steam_api64.dll", lib:"hlsteam" },
@@ -102,6 +109,8 @@ class HashLink extends Target {
 			{ f:"Info.plist", d: "Contents/" },
 			{ f:"libhl.dylib", d: "Contents/MacOS/" },
 			{ f:"mysql.hdll", d: "Contents/MacOS/" },
+			{ f:"hlimgui.hdll", d: "Contents/MacOS/" },
+
 
 			{ f:"fmt.hdll", d: "Contents/MacOS/" },
 			{ f:"libpng16.16.dylib", d: "Contents/MacOS/" },
@@ -132,6 +141,7 @@ class HashLink extends Target {
 			{ f:"hl", format:"$" },
 			{ f:"libhl.so" },
 			{ f:"mysql.hdll" },
+			{ f:"hlimgui.hdll" },
 
 			{ f:"ssl.hdll" },
 			{ f:"libmbedtls.so.10" },
