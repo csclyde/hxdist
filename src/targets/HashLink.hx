@@ -109,7 +109,6 @@ class HashLink extends Target {
 			{ f:"Info.plist", d: "Contents/" },
 			{ f:"libhl.dylib", d: "Contents/MacOS/" },
 			{ f:"mysql.hdll", d: "Contents/MacOS/" },
-			{ f:"hlimgui.hdll", d: "Contents/MacOS/" },
 
 
 			{ f:"fmt.hdll", d: "Contents/MacOS/" },
@@ -141,7 +140,6 @@ class HashLink extends Target {
 			{ f:"hl", format:"$" },
 			{ f:"libhl.so" },
 			{ f:"mysql.hdll" },
-			{ f:"hlimgui.hdll" },
 
 			{ f:"ssl.hdll" },
 			{ f:"libmbedtls.so.10" },
