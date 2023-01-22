@@ -23,13 +23,14 @@ class HashLink extends Target {
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
 		}
 
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_win_itch.zip', outputDir + "/hl_win/");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', outputDir + '/hl_mac/');
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_itch.zip', outputDir + "/hl_linux/");
+		if(Sys.systemName() == 'Windows') {
+			Term.print('Setting exe icon...');
+			runTool('rcedit.exe', [outputDir + '/hl_win/$projName/${projName}.exe', '--set-icon "${projDir}/${projName}.ico"']);
+		}
 
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_win_steam.zip', outputDir + '/hl_win/${projName}/');
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', outputDir + '/hl_mac/${projName}/');
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_steam.zip', outputDir + '/hl_linux/${projName}/');
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + '/hl_mac/');
+		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
 
 		if(Sys.systemName() == 'Windows') {
 			Term.print('Updating execute permissions on Mac/Linux zip files...');
@@ -78,7 +79,7 @@ class HashLink extends Target {
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
-			{ f:"hlimgui.hdll" },
+			{ f:"hlimgui.hdll", lib:"hlimgui" },
 			{ f:"sdl.hdll", lib:"hlsdl" },
 			{ f:"directx.hdll", lib:"hldx" },
 			{ f:"steam.hdll", lib:"hlsteam" },
@@ -109,7 +110,6 @@ class HashLink extends Target {
 			{ f:"Info.plist", d: "Contents/" },
 			{ f:"libhl.dylib", d: "Contents/MacOS/" },
 			{ f:"mysql.hdll", d: "Contents/MacOS/" },
-
 
 			{ f:"fmt.hdll", d: "Contents/MacOS/" },
 			{ f:"libpng16.16.dylib", d: "Contents/MacOS/" },

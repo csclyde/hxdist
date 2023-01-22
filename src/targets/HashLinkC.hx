@@ -37,8 +37,9 @@ class HashLinkC extends Target {
 		}
 		else if(Sys.systemName() == 'Windows') {
 			// Term.warning("Windows HL/C build not yet implemented...");
-			Term.print("Attempting Windows build with MSVC... ");
-			createPackageMSVC(hxmlContent, outputDir + '/hlc_win', winFiles);
+			Term.print("Attempting Windows build with gcc... ");
+			// createPackageMSVC(hxmlContent, outputDir + '/hlc_win', winFiles);
+			createPackageGcc(hxmlContent, outputDir + '/hlc_win', winFiles);
 		}
 		else if(Sys.systemName() == 'Mac') {
 			Term.warning("Mac HL/C build not yet implemented...");
@@ -68,9 +69,9 @@ class HashLinkC extends Target {
 		copyRuntimeFiles(hxml, packageDir, files);
 		
 		if(result == 0) {
-			Term.print('Linux build successfull!');
+			Term.print('gcc build successfull!');
 		} else {
-			Term.error('Linux build failed...');
+			Term.error('gcc build failed...');
 		}
 	}
 
@@ -132,7 +133,9 @@ class HashLinkC extends Target {
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
+			{ f:"hlimgui.hdll", lib:"hlimgui" },
 			{ f:"sdl.hdll", lib:"hlsdl" },
+			{ f:"directx.hdll", lib:"hldx" },
 			{ f:"steam.hdll", lib:"hlsteam" },
 			{ f:"openal.hdll", lib:"heaps" },
 			{ f:"ui.hdll", lib:"heaps" },
@@ -141,6 +144,11 @@ class HashLinkC extends Target {
 			{ f:"libhl.dll" },
 			{ f:"msvcr120.dll" },
 			{ f:"msvcp120.dll" },
+			{ f:"libmbedcrypto.dll" },
+			{ f:"libmbedtls.dll" },
+			{ f:"libmbedx509.dll" },
+			{ f:"libpcre-1.dll" },
+			{ f:"zlib1.dll" },
 			{ f:"OpenAL32.dll", lib:"heaps" },
 			{ f:"SDL2.dll", lib:"hlsdl" },
 			{ f:"steam_api64.dll", lib:"hlsteam" },
