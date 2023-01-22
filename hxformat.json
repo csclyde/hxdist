@@ -1,0 +1,53 @@
+{
+    "indentation": {
+        "trailingWhitespace": false,
+        "character": "tab"
+    },
+    "lineEnds": {
+        "emptyCurly": "noBreak",
+        "leftCurly": "after"
+    },
+    "sameLine": {
+        "elseIf": "same",
+        "elseBody": "same",
+        "doWhile": "same",
+        "forBody": "same",
+        "functionBody": "same",
+        "anonFunctionBody": "same"
+    },
+    "emptyLines": {
+        "afterBlocks": "keep",
+        "betweenMultilineComments": 0,
+        "maxAnywhereInFile": 1,
+        "betweenSingleLineTypes": 0,
+        "finalNewline": true,
+        "afterPackage": 1,
+        "betweenTypes": 1,
+        "afterReturn": "remove",
+        "classEmptyLines": {
+            "betweenStaticVars": 0,
+            "afterStaticFunctions": 0,
+            "afterStaticVars": 0,
+            "afterPrivateVars": 0,
+            "afterVars": 0,
+            "afterPrivateFunctions": 0,
+            "betweenFunctions": 0,
+            "betweenStaticFunctions": 0
+        }
+    },
+    "whitespace": {
+        "colonPolicy": "around",
+        "whilePolicy": "none",
+        "ifPolicy":"before",
+        "forPolicy": "none",
+        "switchPolicy": "none",
+        "typeParamOpenPolicy": "none",
+        "typeParamClosePolicy": "none",
+        "parenConfig": {
+            "funcParamParens": {
+                "openingPolicy": "none",
+                "closingPolicy": "none"
+            }
+        }
+    }
+}

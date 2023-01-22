@@ -13,29 +13,32 @@ class HashLink extends Target {
 
         var hxmlContent = Target.parseHxml(projDir, hxml);
 
-        createPackage(hxmlContent, outputDir + '/hl_win/${projName}/', winFiles);
-        createPackage(hxmlContent, outputDir + '/hl_mac/${projName}/$projName.app/', macFiles);
-        createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
-
-		if(Sys.systemName() != 'Windows') {
-			Term.print("Updated the mac and linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
-			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
-		}
-
+		// WINDOWS
 		if(Sys.systemName() == 'Windows') {
+			createPackage(hxmlContent, outputDir + '/hl_win/${projName}/', winFiles);
+
 			Term.print('Setting exe icon...');
 			runTool('rcedit.exe', [outputDir + '/hl_win/$projName/${projName}.exe', '--set-icon "${projDir}/${projName}.ico"']);
-		}
 
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + '/hl_mac/');
-		FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
+		} 
+		// LINUX
+		else if(Sys.systemName() == 'Linux') {
+			createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
+			
+			Term.print("Updating the linux files with execute permissions...");
+			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
 
-		if(Sys.systemName() == 'Windows') {
-			Term.print('Updating execute permissions on Mac/Linux zip files...');
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_mac.app.zip', '$projName.app/Contents/MacOS/$projName']);
-			runTool('zip_exec.exe', [outputDir + '/${projName}_hl_linux.zip', projName]);
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
+		} 
+		// MAC
+		else if(Sys.systemName() == 'Mac') {
+			createPackage(hxmlContent, outputDir + '/hl_mac/${projName}/$projName.app/', macFiles);
+			
+			Term.print("Updating the mac files with execute permissions...");
+			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
+
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + '/hl_mac/');
 		}
 	}
 
@@ -47,8 +50,6 @@ class HashLink extends Target {
 		
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
-
-		
 		
 		// we need some special junk done on mac
 		if(files == macFiles) {
