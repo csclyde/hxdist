@@ -28,7 +28,7 @@ class HashLink extends Target {
 			createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
 			
 			Term.print("Updating the linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
+			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/$projName.x64']);
 
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_itch.zip', '$outputDir/hl_linux/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_steam.zip', '$outputDir/hl_linux/$projName/');
@@ -141,7 +141,7 @@ class HashLink extends Target {
         dir: 'dist_files/hl_linux/',
 		files: [
 			// HashLink binary
-			{ f:"hl", format:"$" },
+			{ f:"hl", format:"$.x64" },
 			{ f:"libhl.so" },
 			{ f:"mysql.hdll" },
 
