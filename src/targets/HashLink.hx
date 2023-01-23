@@ -20,7 +20,8 @@ class HashLink extends Target {
 			Term.print('Setting exe icon...');
 			runTool('rcedit.exe', [outputDir + '/hl_win/$projName/${projName}.exe', '--set-icon "${projDir}/${projName}.ico"']);
 
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_win.zip', outputDir + "/hl_win/");
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_win_itch.zip', '$outputDir/hl_win/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_win_steam.zip', '$outputDir/hl_win/$projName/');
 		} 
 		// LINUX
 		else if(Sys.systemName() == 'Linux') {
@@ -29,7 +30,8 @@ class HashLink extends Target {
 			Term.print("Updating the linux files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/' + projName]);
 
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux.zip', outputDir + "/hl_linux/");
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_itch.zip', '$outputDir/hl_linux/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_steam.zip', '$outputDir/hl_linux/$projName/');
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
@@ -38,7 +40,8 @@ class HashLink extends Target {
 			Term.print("Updating the mac files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
 
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac.zip', outputDir + '/hl_mac/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
 		}
 	}
 
