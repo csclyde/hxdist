@@ -118,21 +118,26 @@ class HashLink extends Target {
 			{ f:"fmt.hdll", d: "Contents/MacOS/" },
 			{ f:"libpng16.16.dylib", d: "Contents/MacOS/" },
 			{ f:"libvorbis.0.dylib", d: "Contents/MacOS/" },
+			{ f:"libogg.0.dylib", d: "Contents/MacOS/" },
 			{ f:"libvorbisfile.3.dylib", d: "Contents/MacOS/" },
+			{ f:"libturbojpeg.0.dylib", d: "Contents/MacOS/" },
+			{ f:"libz.1.dylib", d: "Contents/MacOS/" },
 
 			{ f:"ssl.hdll", d: "Contents/MacOS/" },
-			{ f:"libmbedtls.10.dylib", d: "Contents/MacOS/" },
+			{ f:"libmbedtls.14.dylib", d: "Contents/MacOS/" },
+			{ f:"libmbedcrypto.7.dylib", d: "Contents/MacOS/" },
+			{ f:"libmbedx509.1.dylib", d: "Contents/MacOS/" },
 
 			{ lib:"hlsdl", f:"sdl.hdll", d: "Contents/MacOS/" },
 			{ lib:"hlsdl", f:"libSDL2-2.0.0.dylib", d: "Contents/MacOS/" },
 			
 			{ lib:"heaps", f:"ui.hdll", d: "Contents/MacOS/" },
 			{ lib:"heaps", f:"uv.hdll", d: "Contents/MacOS/" },
-			{ lib:"heaps", f:"openal.hdll", d: "Contents/MacOS/" },
 			{ lib:"heaps", f:"libuv.1.dylib", d: "Contents/MacOS/" },
+			{ lib:"heaps", f:"openal.hdll", d: "Contents/MacOS/" },
 			{ lib:"heaps", f:"libopenal.1.dylib", d: "Contents/MacOS/" },
 
-			{ lib:"hlsteam", f:"steam.hdll", d: "Contents/MacOS/" },
+			// { lib:"hlsteam", f:"steam.hdll", d: "Contents/MacOS/" },
 		],
 	}
 
