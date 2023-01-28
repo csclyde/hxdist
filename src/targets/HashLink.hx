@@ -22,7 +22,7 @@ class HashLink extends Target {
 
 			// for steam, grab the appid
 			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
-				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/steam_appid.txt');
+				FileUtil.copyFile(projDir + '/steam_appid.txt', '$outputDir/hl_win/$projName/steam_appid.txt');
 			}
 
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_win_itch.zip', '$outputDir/hl_win/');
@@ -33,11 +33,11 @@ class HashLink extends Target {
 			createPackage(hxmlContent, outputDir + '/hl_linux/${projName}/', linuxFiles);
 			
 			Term.print("Updating the linux files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/$projName.x64']);
+			Sys.command('chmod', ['+x', outputDir + '/hl_linux/$projName/$projName.x64']);
 
 			// for steam, grab the appid
 			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
-				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/steam_appid.txt');
+				FileUtil.copyFile(projDir + '/steam_appid.txt', '$outputDir/hl_linux/$projName/steam_appid.txt');
 			}
 
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_itch.zip', '$outputDir/hl_linux/');
