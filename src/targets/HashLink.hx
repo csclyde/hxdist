@@ -20,6 +20,11 @@ class HashLink extends Target {
 			Term.print('Setting exe icon...');
 			runTool('rcedit.exe', [outputDir + '/hl_win/$projName/${projName}.exe', '--set-icon "${projDir}/${projName}.ico"']);
 
+			// for steam, grab the appid
+			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
+				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/steam_appid.txt');
+			}
+
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_win_itch.zip', '$outputDir/hl_win/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_win_steam.zip', '$outputDir/hl_win/$projName/');
 		} 
@@ -29,6 +34,11 @@ class HashLink extends Target {
 			
 			Term.print("Updating the linux files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/${projName}/$projName.x64']);
+
+			// for steam, grab the appid
+			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
+				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/steam_appid.txt');
+			}
 
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_itch.zip', '$outputDir/hl_linux/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_linux_steam.zip', '$outputDir/hl_linux/$projName/');
@@ -40,17 +50,20 @@ class HashLink extends Target {
 			Term.print("Updating the mac files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
 			
-			Term.print("Setting the icon for the app bundle...");
-
+			// for steam, grab the appid
+			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
+				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/steam_appid.txt');
+			}
+			
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
 		}
 	}
-
+	
     function createPackage(hxml:Array<String>, packageDir:String, files:Target.RuntimeFiles) {
 		Term.print("Packaging " + packageDir + "...");
 		FileUtil.createDirectory(packageDir);
-
+		
 		copyRuntimeFiles(hxml, packageDir, files);
 		
 		// Copy HL bin file
@@ -60,12 +73,13 @@ class HashLink extends Target {
 		if(files == macFiles) {
 			FileUtil.createDirectory(packageDir + 'Contents/Resources/');
 			FileUtil.copyFile(out, packageDir + 'Contents/MacOS/hlboot.dat');
-
+			
 			Term.print("Updating Info.plist with project variables...");
 			var infoData = sys.io.File.getContent(packageDir + 'Contents/Info.plist');
 			infoData = StringTools.replace(infoData, "$PROJ_NAME", projName);
 			sys.io.File.saveContent(packageDir + 'Contents/Info.plist', infoData);
-
+			
+			Term.print("Setting the icon for the app bundle...");
 			if(sys.FileSystem.exists('${projDir}/${projName}.icns')) {
 				FileUtil.copyFile('$projDir/$projName.icns', packageDir + 'Contents/Resources/$projName.icns');
 			}
@@ -146,7 +160,8 @@ class HashLink extends Target {
 			{ lib:"heaps", f:"openal.hdll", d: "Contents/MacOS/" },
 			{ lib:"heaps", f:"libopenal.1.dylib", d: "Contents/MacOS/" },
 
-			// { lib:"hlsteam", f:"steam.hdll", d: "Contents/MacOS/" },
+			{ lib:"hlsteam", f:"steam.hdll", d: "Contents/MacOS/" },
+			{ lib:"hlsteam", f:"libsteam_api.dylib", d: "Contents/MacOS/" },
 		],
 	}
 
