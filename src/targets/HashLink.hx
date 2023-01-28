@@ -39,6 +39,8 @@ class HashLink extends Target {
 			
 			Term.print("Updating the mac files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
+			
+			Term.print("Setting the icon for the app bundle...");
 
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
@@ -56,12 +58,18 @@ class HashLink extends Target {
 		
 		// we need some special junk done on mac
 		if(files == macFiles) {
+			FileUtil.createDirectory(packageDir + 'Contents/Resources/');
 			FileUtil.copyFile(out, packageDir + 'Contents/MacOS/hlboot.dat');
 
 			Term.print("Updating Info.plist with project variables...");
 			var infoData = sys.io.File.getContent(packageDir + 'Contents/Info.plist');
 			infoData = StringTools.replace(infoData, "$PROJ_NAME", projName);
 			sys.io.File.saveContent(packageDir + 'Contents/Info.plist', infoData);
+
+			if(sys.FileSystem.exists('${projDir}/${projName}.icns')) {
+				FileUtil.copyFile('$projDir/$projName.icns', packageDir + 'Contents/Resources/$projName.icns');
+			}
+			
 		} else {
 			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
 		}
@@ -112,6 +120,7 @@ class HashLink extends Target {
 		files: [
 			{ f:"hl", format:"$", d: "Contents/MacOS/"},
 			{ f:"Info.plist", d: "Contents/" },
+			{ f:"entitlements.plist", d: "Contents/" },
 			{ f:"libhl.dylib", d: "Contents/MacOS/" },
 			{ f:"mysql.hdll", d: "Contents/MacOS/" },
 

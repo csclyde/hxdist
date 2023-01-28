@@ -11,7 +11,7 @@
   <key>CFBundleName</key>
   <string>$PROJ_NAME</string>
   <key>CFBundleIconFile</key>
-  <string>foo.icns</string>
+  <string>$PROJ_NAME.icns</string>
   <key>CFBundleShortVersionString</key>
   <string>0.01</string>
   <key>CFBundleInfoDictionaryVersion</key>
