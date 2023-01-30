@@ -3,7 +3,6 @@
 A program to package Haxe applications for distribution. 
 
 - Thanks to Sébastien Bénard for redistHelper, which this tool is based off of (https://github.com/deepnight/redistHelper).
-- Thanks to Ronnie Hedlund for making a tool to give Linux/Mac zip files the correct execute permissions (https://sourceforge.net/p/galaxyv2/code/HEAD/tree/other/zip_exec/zip_exec.cpp)
 
 # Targets
 
@@ -17,11 +16,13 @@ A program to package Haxe applications for distribution.
 
 - Heaps.io
 - SDL
+- DirectX
+- Steam API
+- HLImGui
 
 ## Future Targets
 
 - HashLink/C compiled executable: Windows, Mac
-- HashLink/C cross compilation from all platforms to all platforms
 - OpenFL
 - HaxeFlixel
 
@@ -32,16 +33,16 @@ haxelib install hxdist
 ```
 
 ## Usage
+If you want your Windows app to have an icon, include a .ico file with the same name as your project in the top level (next to the .hxml). Same for Mac, except it excepts a .icns file.
+
+For Steam/HLImGui, make sure your hxml file is including "-lib hlsteam". If so, the tool will package up the Steam hdll and dynamic library in your package. It will also look for a steam_appid.txt in your top level project folder, and include that with the bundle.
 
 ```
 USAGE:
-    haxelib run hxdist [<hxml1>] [<hxml2>] [<hxml3>]
+    haxelib run hxdist [<hxml>]
 FLAGS:
     -h Show tool usage
     -v Verbose output
-PARAMS:
-    [-p <project_name>] Defaults to the project folder name
-    [-o <output_dir>] Defaults to /dist within your project folder
 EXAMPLES:
-    haxelib run hxdist hashlink.hxml -o someFolder -p MyGreatGame
+    haxelib run hxdist hashlink.hxml
 ```
