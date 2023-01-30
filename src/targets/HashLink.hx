@@ -56,6 +56,11 @@ class HashLink extends Target {
 				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/steam_appid.txt');
 			}
 			
+			Term.print("Input the Developer ID (Developer ID Application: Simon Smith (TK421)):");
+			var appId:String = Sys.stdin().readLine();
+			Term.print("Codesigning the app bundle...");
+			Sys.command('codesign', ['-s', appId, '--timestamp', '--options', 'runtime', '-f', '--entitlements', '$outputDir/hl_mac/${projName}/entitlements.plist', '--deep', '$outputDir/hl_mac/${projName}/$projName.app']);
+
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
 			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
 		}
@@ -144,9 +149,9 @@ class HashLink extends Target {
 		files: [
 			{ f:"hl", format:"$", d: "Contents/MacOS/"},
 			{ f:"Info.plist", d: "Contents/" },
-			{ f:"entitlements.plist", d: "Contents/" },
 			{ f:"libhl.dylib", d: "Contents/MacOS/" },
 			{ f:"mysql.hdll", d: "Contents/MacOS/" },
+			{ f:"entitlements.plist", d: "../" },
 
 			{ f:"fmt.hdll", d: "Contents/MacOS/" },
 			{ f:"libpng16.16.dylib", d: "Contents/MacOS/" },
