@@ -34,6 +34,7 @@ class HashLink extends Target {
 			
 			Term.print("Updating the linux files with execute permissions...");
 			Sys.command('chmod', ['+x', outputDir + '/hl_linux/$projName/$projName.x64']);
+			Sys.command('chmod', ['+x', outputDir + '/hl_linux/$projName/run.sh']);
 
 			// for steam, grab the appid
 			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
@@ -69,8 +70,20 @@ class HashLink extends Target {
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
 		
-		// we need some special junk done on mac
-		if(files == macFiles) {
+		// WINDOWS
+		if(Sys.systemName() == 'Windows') {
+			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+		}
+		// LINUX
+		else if(Sys.systemName() == 'Linux') {
+			var runScript = sys.io.File.getContent(packageDir + 'run.sh');
+			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
+			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
+	
+			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+		}
+		// MAC
+		else if(Sys.systemName() == 'Mac') {
 			FileUtil.createDirectory(packageDir + 'Contents/Resources/');
 			FileUtil.copyFile(out, packageDir + 'Contents/MacOS/hlboot.dat');
 			
@@ -83,9 +96,6 @@ class HashLink extends Target {
 			if(sys.FileSystem.exists('${projDir}/${projName}.icns')) {
 				FileUtil.copyFile('$projDir/$projName.icns', packageDir + 'Contents/Resources/$projName.icns');
 			}
-			
-		} else {
-			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
 		}
 	}
 
@@ -171,6 +181,7 @@ class HashLink extends Target {
 		files: [
 			// HashLink binary
 			{ f:"hl", format:"$.x64" },
+			{ f:"run.sh" },
 			{ f:"libhl.so" },
 			{ f:"mysql.hdll" },
 
