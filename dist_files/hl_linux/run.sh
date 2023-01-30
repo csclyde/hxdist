@@ -1,1 +1,3 @@
+#!/bin/bash
+
 LD_PRELOAD= LD_LIBRARY_PATH=. ./$PROJ_NAME.x64
