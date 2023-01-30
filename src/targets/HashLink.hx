@@ -46,23 +46,40 @@ class HashLink extends Target {
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
-			createPackage(hxmlContent, outputDir + '/hl_mac/${projName}/$projName.app/', macFiles);
+			var outputFolder = '$outputDir/hl_mac/$projName';
+			var appFolder = '$outputFolder/$projName.app';
+			var exeFolder = '$appFolder/Contents/MacOS';
+
+			createPackage(hxmlContent, appFolder, macFiles);
 			
 			Term.print("Updating the mac files with execute permissions...");
-			Sys.command('chmod', ['+x', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/' + projName]);
+			Sys.command('chmod', ['+x', '$exeFolder/$projName']);
 			
 			// for steam, grab the appid
-			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists(projDir + '/steam_appid.txt')) {
-				FileUtil.copyFile(projDir + '/steam_appid.txt', outputDir + '/hl_mac/${projName}/$projName.app/Contents/MacOS/steam_appid.txt');
+			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists('$projDir/steam_appid.txt')) {
+				FileUtil.copyFile('$projDir/steam_appid.txt', '$exeFolder/steam_appid.txt');
 			}
 			
 			Term.print("Input the Developer ID (Developer ID Application: Simon Smith (TK421)):");
 			var appId:String = Sys.stdin().readLine();
-			Term.print("Codesigning the app bundle...");
-			Sys.command('codesign', ['-s', appId, '--timestamp', '--options', 'runtime', '-f', '--entitlements', '$outputDir/hl_mac/${projName}/entitlements.plist', '--deep', '$outputDir/hl_mac/${projName}/$projName.app']);
 
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
+			Term.print("Codesigning the app bundle...");
+			Sys.command('codesign', ['-s', appId, '--timestamp', '--options', 'runtime', '-f', '--entitlements', '$outputFolder/entitlements.plist', '--deep', '$outputFolder/$projName.app']);
+			
+			Term.print("Zipping the signed bundle...");
+			Sys.command('ditto', ['-c', '-k' ,'--keepParent', '$outputFolder/$projName.app', '$outputFolder/$projName.zip']);
+			
+			Term.print("Enter notarytool profile name:");
+			var notaryProfile:String = Sys.stdin().readLine();
+
+			Term.print("Notarizing app (might take a while)...");
+			Sys.command('xcrun notarytool', ['submit', '$outputFolder/$projName.zip', '--keychain-profile', notaryProfile, '--wait']);
+			
+			Term.print("Stapling notary to app...");
+			Sys.command('xcrun stapler', ['staple', '$outputFolder/$projName.app']);
+			// xcrun stapler staple "target/mac/Espanso.app"
+			// FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
+			// FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
 		}
 	}
 	
@@ -77,29 +94,29 @@ class HashLink extends Target {
 		
 		// WINDOWS
 		if(Sys.systemName() == 'Windows') {
-			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
 		}
 		// LINUX
 		else if(Sys.systemName() == 'Linux') {
-			var runScript = sys.io.File.getContent(packageDir + 'run.sh');
+			var runScript = sys.io.File.getContent('$packageDir/run.sh');
 			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
 			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
 	
-			FileUtil.copyFile(out, packageDir + "/hlboot.dat");
+			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
 		}
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
-			FileUtil.createDirectory(packageDir + 'Contents/Resources/');
-			FileUtil.copyFile(out, packageDir + 'Contents/MacOS/hlboot.dat');
+			FileUtil.createDirectory('$packageDir/Contents/Resources/');
+			FileUtil.copyFile(out, '$packageDir/Contents/MacOS/hlboot.dat');
 			
 			Term.print("Updating Info.plist with project variables...");
-			var infoData = sys.io.File.getContent(packageDir + 'Contents/Info.plist');
+			var infoData = sys.io.File.getContent('$packageDir/Contents/Info.plist');
 			infoData = StringTools.replace(infoData, "$PROJ_NAME", projName);
-			sys.io.File.saveContent(packageDir + 'Contents/Info.plist', infoData);
+			sys.io.File.saveContent('$packageDir/Contents/Info.plist', infoData);
 			
 			Term.print("Setting the icon for the app bundle...");
 			if(sys.FileSystem.exists('${projDir}/${projName}.icns')) {
-				FileUtil.copyFile('$projDir/$projName.icns', packageDir + 'Contents/Resources/$projName.icns');
+				FileUtil.copyFile('$projDir/$projName.icns', '$packageDir/Contents/Resources/$projName.icns');
 			}
 		}
 	}
