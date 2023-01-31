@@ -103,7 +103,7 @@ class HashLink extends Target {
 		else if(Sys.systemName() == 'Linux') {
 			var runScript = sys.io.File.getContent('$packageDir/run.sh');
 			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
-			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
+			sys.io.File.saveContent('$packageDir/run.sh', runScript);
 	
 			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
 		}
