@@ -15,55 +15,45 @@ class HashLink extends Target {
 
 		// WINDOWS
 		if(Sys.systemName() == 'Windows') {
-			var packageDir = '$outputDir/hl_win/$projName';
+			var packageDir = '$outputDir/$projName';
 
 			createPackage(hxmlContent, packageDir, winFiles);
 
 			Term.print('Setting exe icon...');
-			runTool('rcedit.exe', ['$packageDir/$projName.exe', '--set-icon "$projDir/$projName.ico"']);
+			runTool('rcedit.exe', ['$packageDir/$projName.exe', '--set-icon "$projDir/meta/$projName.ico"']);
 
-			// for steam, grab the appid
-			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists('$projDir/steam_appid.txt')) {
-				FileUtil.copyFile('$projDir/steam_appid.txt', '$packageDir/steam_appid.txt');
-			}
-
-			FileUtil.zipFolder('$outputDir/${projName}_hl_win_itch.zip', '$outputDir/hl_win/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_win_itch.zip', '$outputDir/');
 			FileUtil.zipFolder('$outputDir/${projName}_hl_win_steam.zip', '$packageDir/');
 		} 
 		// LINUX
 		else if(Sys.systemName() == 'Linux') {
-			var packageDir = '$outputDir/hl_linux/$projName';
+			var packageDir = '$outputDir/$projName';
 
 			createPackage(hxmlContent, packageDir, linuxFiles);
 			
 			Term.print("Updating the linux files with execute permissions...");
 			Sys.command('chmod', ['+x', '$packageDir/$projName.x64']);
 			Sys.command('chmod', ['+x', '$packageDir/run.sh']);
+			
+			Term.print("Updating the run script with project variables...");
+			var runScript = sys.io.File.getContent('$packageDir/run.sh');
+			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
+			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
 
-			// for steam, grab the appid
-			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists('$projDir/steam_appid.txt')) {
-				FileUtil.copyFile('$projDir/steam_appid.txt', '$packageDir/steam_appid.txt');
-			}
-
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/hl_linux/');
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/hl_linux/$projName/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
-			var packageDir = '$outputDir/hl_mac/$projName';
+			var packageDir = '$outputDir/$projName';
 
 			createPackage(hxmlContent, packageDir, macFiles);
 			
 			Term.print("Updating the mac files with execute permissions...");
 			Sys.command('chmod', ['+x', '$packageDir/$projName']);
 			
-			// for steam, grab the appid
-			if(hxmlRequiresLib(hxmlContent, 'hlsteam') && FileSystem.exists('$projDir/steam_appid.txt')) {
-				FileUtil.copyFile('$projDir/steam_appid.txt', '$packageDir/steam_appid.txt');
-			}
-			
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/hl_mac/');
-			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/hl_mac/$projName/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_itch.zip', '$outputDir/');
+			FileUtil.zipFolder(outputDir + '/${projName}_hl_mac_steam.zip', '$outputDir/$projName/');
 			
 			// Term.print("Input the Developer ID (Developer ID Application: Simon Smith (TK421)):");
 			// var appId:String = Sys.stdin().readLine();
@@ -95,31 +85,11 @@ class HashLink extends Target {
 		// Copy HL bin file
 		var out = getHxmlParam(hxml, "-hl");
 		
-		// WINDOWS
-		if(Sys.systemName() == 'Windows') {
-			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
-		}
-		// LINUX
-		else if(Sys.systemName() == 'Linux') {
-			var runScript = sys.io.File.getContent('$packageDir/run.sh');
-			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
-			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
-	
-			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
-		}
-		// MAC
-		else if(Sys.systemName() == 'Mac') {
-			FileUtil.copyFile(out, '$packageDir/hlboot.dat');
-			
-			// Term.print("Updating Info.plist with project variables...");
-			// var infoData = sys.io.File.getContent('$packageDir/Contents/Info.plist');
-			// infoData = StringTools.replace(infoData, "$PROJ_NAME", projName);
-			// sys.io.File.saveContent('$packageDir/Contents/Info.plist', infoData);
-			
-			// Term.print("Setting the icon for the app bundle...");
-			// if(sys.FileSystem.exists('${projDir}/${projName}.icns')) {
-			// 	FileUtil.copyFile('$projDir/$projName.icns', '$packageDir/Contents/Resources/$projName.icns');
-			// }
+		FileUtil.copyFile(out, '$packageDir/hlboot.dat');
+
+		// for steam, grab the appid
+		if(hxmlRequiresLib(hxml, 'hlsteam') && FileSystem.exists('$projDir/meta/steam_appid.txt')) {
+			FileUtil.copyFile('$projDir/steam_appid.txt', '$packageDir/steam_appid.txt');
 		}
 	}
 
