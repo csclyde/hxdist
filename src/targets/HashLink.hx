@@ -89,7 +89,7 @@ class HashLink extends Target {
 
 		// for steam, grab the appid
 		if(hxmlRequiresLib(hxml, 'hlsteam') && FileSystem.exists('$projDir/meta/steam_appid.txt')) {
-			FileUtil.copyFile('$projDir/steam_appid.txt', '$packageDir/steam_appid.txt');
+			FileUtil.copyFile('$projDir/meta/steam_appid.txt', '$packageDir/steam_appid.txt');
 		}
 	}
 
