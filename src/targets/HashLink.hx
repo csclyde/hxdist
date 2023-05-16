@@ -31,14 +31,15 @@ class HashLink extends Target {
 
 			createPackage(hxmlContent, packageDir, linuxFiles);
 			
+			Term.print("Updating the run script with project variables...");
+			var runScript = sys.io.File.getContent('$packageDir/run.sh');
+			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
+			sys.io.File.saveContent('$packageDir/run.sh', runScript);
+
 			Term.print("Updating the linux files with execute permissions...");
 			Sys.command('chmod', ['+x', '$packageDir/$projName.x64']);
 			Sys.command('chmod', ['+x', '$packageDir/run.sh']);
 			
-			Term.print("Updating the run script with project variables...");
-			var runScript = sys.io.File.getContent('$packageDir/run.sh');
-			runScript = StringTools.replace(runScript, "$PROJ_NAME", projName);
-			sys.io.File.saveContent(packageDir + 'run.sh', runScript);
 
 			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
 			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
