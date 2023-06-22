@@ -71,12 +71,6 @@ class Main {
 				var target = new HashLink(distDir, projectDir, projectName);
 				target.compile(hxml, outputDir);
 			}
-			// HL/C
-			else if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0 && c.indexOf(".c") >= 0).length > 0) {
-				Term.print("Building for HashLink/C target...");
-				var target = new HashLinkC(distDir, projectDir, projectName);
-				target.compile(hxml, outputDir);
-			}
 			// JS
 			else if(hxmlContent.filter((c) -> c.indexOf("-js ") >= 0).length > 0) {
 				Term.print("Building for JavaScript target...");
