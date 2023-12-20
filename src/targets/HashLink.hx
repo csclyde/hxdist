@@ -22,8 +22,7 @@ class HashLink extends Target {
 			Term.print('Setting exe icon...');
 			runTool('rcedit.exe', ['$packageDir/$projName.exe', '--set-icon "$projDir/meta/$projName.ico"']);
 
-			FileUtil.zipFolder('$outputDir/${projName}_hl_win_itch.zip', '$outputDir/');
-			FileUtil.zipFolder('$outputDir/${projName}_hl_win_steam.zip', '$packageDir/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_win.zip', '$packageDir/');
 		} 
 		// LINUX
 		else if(Sys.systemName() == 'Linux') {
@@ -44,8 +43,8 @@ class HashLink extends Target {
 			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
 			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
 
-			Sys.command('(cd $outputDir && zip -r $outputDir/${projName}_hl_linux_itch.zip .)');
-			Sys.command('(cd $packageDir && zip -r $outputDir/${projName}_hl_linux_steam.zip .)');
+			Sys.command('cd', ['$packageDir/']);
+			Sys.command('zip', ['-r', '$outputDir/${projName}_hl_linux.zip', './']);
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
