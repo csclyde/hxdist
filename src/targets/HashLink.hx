@@ -43,8 +43,8 @@ class HashLink extends Target {
 			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
 			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
 
-			Sys.command('cd', ['$packageDir/']);
-			Sys.command('zip', ['-r', '$outputDir/${projName}_hl_linux.zip', './']);
+			// Sys.command('cd', ['$packageDir/']);
+			Sys.command('zip', ['-j', '-r', '$outputDir/${projName}_hl_linux.zip', '$packageDir']);
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
