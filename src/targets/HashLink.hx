@@ -41,8 +41,11 @@ class HashLink extends Target {
 			Sys.command('chmod', ['+x', '$packageDir/run.sh']);
 			
 
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
+			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
+			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
+
+			Sys.command('zip', ['-r', '$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/']);
+			Sys.command('zip', ['-r', '$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/']);
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
