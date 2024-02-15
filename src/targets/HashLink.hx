@@ -183,9 +183,9 @@ class HashLink extends Target {
 			{ f:"mysql.hdll" },
 
 			{ f:"ssl.hdll" },
-			{ f:"libmbedtls.so.10" },
-			{ f:"libmbedx509.so.0" },
-			{ f:"libmbedcrypto.so.0" },
+			{ f:"libmbedtls.so.14" },
+			{ f:"libmbedx509.so.1" },
+			{ f:"libmbedcrypto.so.7" },
 
 			// FMT
 			{ lib:"heaps", f:"fmt.hdll" },
@@ -194,6 +194,7 @@ class HashLink extends Target {
 			{ lib:"heaps", f:"libvorbisfile.so.3" },
 			{ lib:"heaps", f:"libvorbis.so.0" },
 			{ lib:"heaps", f:"libogg.so.0" },
+			{ lib:"heaps", f:"libz.so.1" },
 
 			// openAL
 			{ lib:"heaps", f:"openal.hdll" },
@@ -209,7 +210,7 @@ class HashLink extends Target {
 			// SDL
 			{ lib:"hlsdl", f:"sdl.hdll" },
 			{ lib:"hlsdl", f:"libSDL2-2.0.so.0" },
-			{ lib:"hlsdl", f:"libsndio.so.6.1" },
+			{ lib:"hlsdl", f:"libsndio.so.7" },
 
 			// Steam
 			{ lib:"hlsteam", f:"steam.hdll" },
