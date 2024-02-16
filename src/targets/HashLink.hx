@@ -109,6 +109,7 @@ class HashLink extends Target {
         dir: 'dist_files/hl_win/',
 		files: [
 			// common
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
@@ -140,6 +141,7 @@ class HashLink extends Target {
         dir: 'dist_files/hl_mac/',
 		files: [
 			{ f:"hl", format:"$" },
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"libhl.dylib" },
 			{ f:"mysql.hdll" },
 			{ f:"entitlements.plist", d: "../" },
@@ -180,6 +182,7 @@ class HashLink extends Target {
 			{ f:"hl", format:"$.x64" },
 			{ f:"run.sh" },
 			{ f:"libhl.so" },
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"mysql.hdll" },
 
 			{ f:"ssl.hdll" },
@@ -215,22 +218,6 @@ class HashLink extends Target {
 			// Steam
 			{ lib:"hlsteam", f:"steam.hdll" },
             { lib:"hlsteam", f:"libsteam_api.so" },
-
-
-			
-			// { f:"libbsd.so.0" },
-			// { f:"libmbedcrypto.so" },
-			// { f:"libmbedcrypto.so.2.2.1" },
-			// { f:"libmbedtls.so" },
-			// { f:"libmbedtls.so.2.2.1" },
-			// { f:"libmbedx509.so" },
-			// { f:"libmbedx509.so.2.2.1" },
-			// { f:"libsndio.so" },
-			
-			// { f:"libSDL2-2.0.so", lib:"hlsdl" },
-			// { f:"libSDL2-2.0.so.0.4.0", lib:"hlsdl" },
-			// { f:"libSDL2.so", lib:"hlsdl" },
-			
 		],
 	}
 }
