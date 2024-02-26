@@ -22,8 +22,7 @@ class HashLink extends Target {
 			Term.print('Setting exe icon...');
 			runTool('rcedit.exe', ['$packageDir/$projName.exe', '--set-icon "$projDir/meta/$projName.ico"']);
 
-			FileUtil.zipFolder('$outputDir/${projName}_hl_win_itch.zip', '$outputDir/');
-			FileUtil.zipFolder('$outputDir/${projName}_hl_win_steam.zip', '$packageDir/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_win.zip', '$packageDir/');
 		} 
 		// LINUX
 		else if(Sys.systemName() == 'Linux') {
@@ -41,8 +40,11 @@ class HashLink extends Target {
 			Sys.command('chmod', ['+x', '$packageDir/run.sh']);
 			
 
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
-			FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
+			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_itch.zip', '$outputDir/');
+			// FileUtil.zipFolder('$outputDir/${projName}_hl_linux_steam.zip', '$outputDir/$projName/');
+
+			// Sys.command('cd', ['$packageDir/']);
+			Sys.command('zip', ['-j', '-r', '$outputDir/${projName}_hl_linux.zip', '$packageDir']);
 		} 
 		// MAC
 		else if(Sys.systemName() == 'Mac') {
@@ -107,6 +109,7 @@ class HashLink extends Target {
         dir: 'dist_files/hl_win/',
 		files: [
 			// common
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
 			{ f:"mysql.hdll" },
@@ -138,6 +141,7 @@ class HashLink extends Target {
         dir: 'dist_files/hl_mac/',
 		files: [
 			{ f:"hl", format:"$" },
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"libhl.dylib" },
 			{ f:"mysql.hdll" },
 			{ f:"entitlements.plist", d: "../" },
@@ -178,12 +182,13 @@ class HashLink extends Target {
 			{ f:"hl", format:"$.x64" },
 			{ f:"run.sh" },
 			{ f:"libhl.so" },
+			{ f:"gamecontrollerdb.txt" },
 			{ f:"mysql.hdll" },
 
 			{ f:"ssl.hdll" },
-			{ f:"libmbedtls.so.10" },
-			{ f:"libmbedx509.so.0" },
-			{ f:"libmbedcrypto.so.0" },
+			{ f:"libmbedtls.so.14" },
+			{ f:"libmbedx509.so.1" },
+			{ f:"libmbedcrypto.so.7" },
 
 			// FMT
 			{ lib:"heaps", f:"fmt.hdll" },
@@ -192,6 +197,7 @@ class HashLink extends Target {
 			{ lib:"heaps", f:"libvorbisfile.so.3" },
 			{ lib:"heaps", f:"libvorbis.so.0" },
 			{ lib:"heaps", f:"libogg.so.0" },
+			{ lib:"heaps", f:"libz.so.1" },
 
 			// openAL
 			{ lib:"heaps", f:"openal.hdll" },
@@ -207,27 +213,11 @@ class HashLink extends Target {
 			// SDL
 			{ lib:"hlsdl", f:"sdl.hdll" },
 			{ lib:"hlsdl", f:"libSDL2-2.0.so.0" },
-			{ lib:"hlsdl", f:"libsndio.so.6.1" },
+			{ lib:"hlsdl", f:"libsndio.so.7" },
 
 			// Steam
 			{ lib:"hlsteam", f:"steam.hdll" },
             { lib:"hlsteam", f:"libsteam_api.so" },
-
-
-			
-			// { f:"libbsd.so.0" },
-			// { f:"libmbedcrypto.so" },
-			// { f:"libmbedcrypto.so.2.2.1" },
-			// { f:"libmbedtls.so" },
-			// { f:"libmbedtls.so.2.2.1" },
-			// { f:"libmbedx509.so" },
-			// { f:"libmbedx509.so.2.2.1" },
-			// { f:"libsndio.so" },
-			
-			// { f:"libSDL2-2.0.so", lib:"hlsdl" },
-			// { f:"libSDL2-2.0.so.0.4.0", lib:"hlsdl" },
-			// { f:"libSDL2.so", lib:"hlsdl" },
-			
 		],
 	}
 }
