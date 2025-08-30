@@ -112,7 +112,6 @@ class HashLink extends Target {
 			{ f:"gamecontrollerdb.txt" },
 			{ f:"fmt.hdll" },
 			{ f:"ssl.hdll" },
-			{ f:"mysql.hdll" },
 			{ f:"hlimgui.hdll", lib:"hlimgui" },
 			{ f:"sdl.hdll", lib:"hlsdl" },
 			{ f:"directx.hdll", lib:"hldx" },
@@ -120,16 +119,12 @@ class HashLink extends Target {
 			{ f:"openal.hdll", lib:"heaps" },
 			{ f:"ui.hdll", lib:"heaps" },
 			{ f:"uv.hdll", lib:"heaps" },
+			{ f:"heaps.hdll", lib:"heaps" },
 
 			{ f:"hl.exe", format:"$.exe" },
 			{ f:"libhl.dll" },
-			{ f:"msvcr120.dll" },
-			{ f:"msvcp120.dll" },
-			{ f:"libmbedcrypto.dll" },
-			{ f:"libmbedtls.dll" },
-			{ f:"libmbedx509.dll" },
-			{ f:"libpcre-1.dll" },
-			{ f:"zlib1.dll" },
+			
+			
 			{ f:"OpenAL32.dll", lib:"heaps" },
 			{ f:"SDL2.dll", lib:"hlsdl" },
 			{ f:"steam_api64.dll", lib:"hlsteam" },
