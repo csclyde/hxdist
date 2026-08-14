@@ -65,18 +65,26 @@ class Main {
 		for(hxml in Term.hxmlPaths) {
 			Term.print("Parsing " + hxml + "...");
 			var hxmlContent = Target.parseHxml(projectDir, hxml);
+			var hasHashLinkOutput = Target.hasHxmlParam(hxmlContent, '-hl');
+			var hasJavaScriptOutput = Target.hasHxmlParam(hxmlContent, '-js');
 
-			// HL
-			if(hxmlContent.filter((c) -> c.indexOf("-hl ") >= 0 && c.indexOf(".hl") >= 0).length > 0) {
+			if(hasHashLinkOutput && hasJavaScriptOutput)
+				Term.error('HXML file contains both -hl and -js outputs; split them into separate HXML files.');
+
+			// HashLink
+			if(hasHashLinkOutput) {
 				Term.print("Building for HashLink target...");
 				var target = new HashLink(distDir, projectDir, projectName);
 				target.compile(hxml, outputDir);
 			}
-			// JS
-			else if(hxmlContent.filter((c) -> c.indexOf("-js ") >= 0).length > 0) {
+			// JavaScript
+			else if(hasJavaScriptOutput) {
 				Term.print("Building for JavaScript target...");
 				var target = new JavaScript(distDir, projectDir, projectName);
 				target.compile(hxml, outputDir);
+			}
+			else {
+				Term.error('HXML file does not contain a supported output target (-hl or -js): ' + hxml);
 			}
 		
 		}

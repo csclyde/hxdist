@@ -55,12 +55,22 @@ class Term {
 
 			if(foundArg) continue;
 
-			// if we get here, the param hasnt been located yet. treat as hxml
-			if(arg.indexOf('.hxml') >= 0) {
+			// If we get here, the argument must be an HXML input.
+			if(isHxmlPath(arg)) {
 				hxmlPaths.push(arg);
+			}
+			else {
+				error('Unknown argument: $arg');
 			}
 		}
 
+		if(nextParam != '')
+			error('Missing value for parameter: ' + nextParam);
+
+	}
+
+	static function isHxmlPath(path:String):Bool {
+		return StringTools.endsWith(path.toLowerCase(), '.hxml');
 	}
 
 	public static function print(msg:Dynamic) {
