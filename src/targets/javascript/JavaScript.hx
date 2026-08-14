@@ -1,6 +1,9 @@
-package targets;
+package targets.javascript;
 
 import haxe.io.Path;
+import FileUtil;
+import Target;
+import Term;
 
 class JavaScript extends Target {
 	public function new(dd:String, pd:String, pn:String) {

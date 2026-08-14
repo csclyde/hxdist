@@ -1,7 +1,10 @@
+package targets.hashlink;
+
 import haxe.io.Bytes;
 import haxe.io.Path;
 import sys.FileSystem;
-import HashLinkBytecode.HashLinkNative;
+import Term;
+import targets.hashlink.HashLinkBytecode.HashLinkNative;
 
 typedef ResolvedNativeFile = {
 	var source:String;

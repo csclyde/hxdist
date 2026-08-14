@@ -1,7 +1,10 @@
-package targets;
+package targets.hashlink;
 
 import haxe.io.Path;
 import sys.FileSystem;
+import FileUtil;
+import Target;
+import Term;
 
 class HashLink extends Target {
 	public function new(dd:String, pd:String, pn:String) {

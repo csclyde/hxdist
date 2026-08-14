@@ -1,3 +1,5 @@
+package targets.hashlink;
+
 import haxe.io.Bytes;
 
 typedef HashLinkNative = {

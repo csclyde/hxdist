@@ -1,6 +1,7 @@
 import haxe.io.Path;
 import FileUtil;
-import targets.*;
+import targets.hashlink.HashLink;
+import targets.javascript.JavaScript;
 
 class Main {
 	static var distDir = "";
