@@ -88,7 +88,7 @@ class NativeDependencies {
 				// supplied by Windows and must not become part of the package. Do
 				// this after locating it so a private DLL beside the application can
 				// still be packaged when it intentionally shadows a system DLL.
-				if(isSystemDependency(importName, platform) || isSystemPath(dependency, platform)) {
+				if(isSystemDependency(importName, platform) || (isSystemPath(dependency, platform) && !isWindowsRuntimeDependency(importName))) {
 					Term.warning('Leaving system dependency outside package: $importName (required by ${file.destination})');
 					continue;
 				}
@@ -458,6 +458,15 @@ class NativeDependencies {
 		var system32 = root + '/system32/';
 		var syswow64 = root + '/syswow64/';
 		return StringTools.startsWith(normalized, system32) || StringTools.startsWith(normalized, syswow64);
+	}
+
+	static function isWindowsRuntimeDependency(name:String):Bool {
+		var lower = name.toLowerCase();
+		// These are Microsoft C/C++ runtime components. They can be installed
+		// in System32, but unlike API-set contracts they are valid app-local
+		// dependencies and should be copied when a native HashLink library
+		// imports them.
+		return StringTools.startsWith(lower, 'vcruntime') || StringTools.startsWith(lower, 'msvcp') || StringTools.startsWith(lower, 'concrt') || lower == 'ucrtbase.dll';
 	}
 
 	static function unique(values:Array<String>):Array<String> {
