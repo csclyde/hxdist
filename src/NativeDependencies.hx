@@ -84,6 +84,14 @@ class NativeDependencies {
 					}
 					Term.error('Could not resolve native dependency "$importName" required by ${file.destination}. Add it to hxdist.json searchPaths/include.');
 				}
+				// A Windows system DLL may be discoverable through PATH, but it is
+				// supplied by Windows and must not become part of the package. Do
+				// this after locating it so a private DLL beside the application can
+				// still be packaged when it intentionally shadows a system DLL.
+				if(isSystemDependency(importName, platform) || isSystemPath(dependency, platform)) {
+					Term.warning('Leaving system dependency outside package: $importName (required by ${file.destination})');
+					continue;
+				}
 				addFile(dependency, importName, 'native dependency of ${file.destination}', files, byDestination, queued);
 			}
 		}
@@ -421,7 +429,9 @@ class NativeDependencies {
 	static function isBuiltin(name:String, platform:String):Bool {
 		var lower = name.toLowerCase();
 		if(platform == 'Windows') {
-			return StringTools.startsWith(lower, 'api-ms-win-') || StringTools.startsWith(lower, 'ext-ms-win-') || lower == 'kernel32.dll' || lower == 'user32.dll' || lower == 'gdi32.dll' || lower == 'advapi32.dll' || lower == 'shell32.dll' || lower == 'ole32.dll' || lower == 'oleaut32.dll' || lower == 'ws2_32.dll' || lower == 'winmm.dll' || lower == 'version.dll';
+			// API-set DLLs (including ext-ms-win32-*) are logical contracts
+			// implemented by Windows, not files that an application should ship.
+			return StringTools.startsWith(lower, 'api-ms-win') || StringTools.startsWith(lower, 'ext-ms-win') || lower == 'kernel32.dll' || lower == 'kernelbase.dll' || lower == 'ntdll.dll' || lower == 'user32.dll' || lower == 'gdi32.dll' || lower == 'advapi32.dll' || lower == 'shell32.dll' || lower == 'ole32.dll' || lower == 'oleaut32.dll' || lower == 'ws2_32.dll' || lower == 'winmm.dll' || lower == 'version.dll';
 		}
 		return false;
 	}
@@ -430,7 +440,24 @@ class NativeDependencies {
 		var lower = name.toLowerCase();
 		if(platform == 'Mac') return StringTools.startsWith(lower, '/system/') || StringTools.startsWith(lower, '/usr/lib/') || StringTools.startsWith(lower, 'libsystem') || StringTools.startsWith(lower, '@rpath/libsystem');
 		if(platform == 'Linux') return StringTools.startsWith(lower, 'linux-vdso') || StringTools.startsWith(lower, 'libc.so') || StringTools.startsWith(lower, 'libm.so') || StringTools.startsWith(lower, 'libpthread.so') || StringTools.startsWith(lower, 'librt.so') || StringTools.startsWith(lower, 'libdl.so') || StringTools.startsWith(lower, 'libgcc_s.so') || StringTools.startsWith(lower, 'ld-linux') || StringTools.startsWith(lower, 'libresolv.so');
-		return isBuiltin(name, platform);
+		if(platform == 'Windows') {
+			// These are OS-provided names. The path check in isSystemPath also
+			// catches less common Windows DLLs without maintaining a huge list.
+			return isBuiltin(name, platform) || lower == 'comdlg32.dll' || lower == 'comctl32.dll' || lower == 'shlwapi.dll' || lower == 'imm32.dll' || lower == 'setupapi.dll' || lower == 'cfgmgr32.dll' || lower == 'psapi.dll' || lower == 'bcrypt.dll' || lower == 'crypt32.dll' || lower == 'secur32.dll' || lower == 'rpcrt4.dll' || lower == 'uxtheme.dll' || lower == 'dwmapi.dll';
+		}
+		return false;
+	}
+
+	static function isSystemPath(path:String, platform:String):Bool {
+		if(platform != 'Windows') return false;
+		var normalized = key(Path.normalize(FileSystem.fullPath(path)));
+		var root = Sys.getEnv('SystemRoot');
+		if(root == null || root == '') root = Sys.getEnv('WINDIR');
+		if(root == null || root == '') return false;
+		root = key(Path.normalize(FileSystem.fullPath(root)));
+		var system32 = root + '/system32/';
+		var syswow64 = root + '/syswow64/';
+		return StringTools.startsWith(normalized, system32) || StringTools.startsWith(normalized, syswow64);
 	}
 
 	static function unique(values:Array<String>):Array<String> {
