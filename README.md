@@ -35,8 +35,6 @@ folder when Steam is detected.
 
 When distributing to steam, make sure your Linux run config points at the run.sh file, not at the executable itself. Otherwise it won't work.
 
-Windows HashLink packages are converted to the GUI subsystem automatically, so they do not open a console window. hxdist edits the packaged PE header directly and does not require `editbin`. `rcedit` is only used when an icon is provided.
-
 ```
 USAGE:
     haxelib run hxdist [<hxml>]
@@ -72,3 +70,9 @@ be discovered from the compiled bytecode, such as plugins loaded by a file
 name at runtime. Unresolved required libraries and conflicting destination
 file names fail the build; normal operating-system libraries are reported and
 left to the target system.
+
+## Support
+
+If hxdist is useful to you, you can support its development:
+
+[Donate on Ko-fi](https://ko-fi.com/c_l_y_d_e)
