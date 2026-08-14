@@ -128,8 +128,10 @@ class NativeDependencies {
 		var destinationKey = key(destination);
 		var existing = byDestination.get(destinationKey);
 		if(existing != null) {
-			if(key(existing.source) != key(source))
+			if(key(existing.source) != key(source) && !isWindowsRuntimeDependency(destination))
 				Term.error('Two native files would be written as "$destination": ${existing.source} and $source');
+			if(key(existing.source) != key(source) && isWindowsRuntimeDependency(destination))
+				Term.warning('Using already selected Microsoft runtime $destination from ${existing.source}; ignoring duplicate at $source.');
 			return;
 		}
 		var file:ResolvedNativeFile = {source: source, destination: destination, reason: reason};
@@ -208,20 +210,34 @@ class NativeDependencies {
 	static function locate(name:String, roots:Array<String>, localDir:String):String {
 		name = StringTools.replace(name, '\\', '/');
 		if(Path.isAbsolute(name) && FileSystem.exists(name) && !FileSystem.isDirectory(name)) return name;
+		var systemCandidate:String = null;
 		if(localDir != null) {
 			var local = Path.normalize(localDir + '/' + Path.withoutDirectory(name));
-			if(FileSystem.exists(local) && !FileSystem.isDirectory(local)) return local;
+			if(FileSystem.exists(local) && !FileSystem.isDirectory(local)) {
+				if(!isSystemLocation(local)) return local;
+				systemCandidate = local;
+			}
 		}
 		for(root in roots) {
 			var direct = Path.normalize(root + '/' + Path.withoutDirectory(name));
-			if(FileSystem.exists(direct) && !FileSystem.isDirectory(direct)) return direct;
+			if(FileSystem.exists(direct) && !FileSystem.isDirectory(direct)) {
+				if(!isSystemLocation(direct)) return direct;
+				if(systemCandidate == null) systemCandidate = direct;
+			}
 		}
 		for(root in roots) {
 			if(!deepSearchRoots.exists(key(root))) continue;
 			var found = locateRecursive(root, Path.withoutDirectory(name), 5, new Map<String, Bool>());
-			if(found != null) return found;
+			if(found != null) {
+				if(!isSystemLocation(found)) return found;
+				if(systemCandidate == null) systemCandidate = found;
+			}
 		}
-		return null;
+		return systemCandidate;
+	}
+
+	static function isSystemLocation(path:String):Bool {
+		return Sys.systemName() == 'Windows' && isSystemPath(path, 'Windows');
 	}
 
 	static function locateRecursive(root:String, name:String, depth:Int, visited:Map<String, Bool>):String {
