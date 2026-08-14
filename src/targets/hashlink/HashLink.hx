@@ -37,6 +37,9 @@ class HashLink extends Target {
 				Term.print('No Windows icon found; skipping icon update.');
 			}
 
+			Term.print('Changing Windows executable to GUI subsystem...');
+			WindowsExecutable.setGuiSubsystem('$packageDir/$projName.exe');
+
 			FileUtil.zipFolder('$outputDir/${projName}_hl_win.zip', '$packageDir/');
 		}
 		else if(platform == 'Linux') {
