@@ -17,14 +17,18 @@ class Term {
 	public static var selectedParams: Map<String, String> = [];
 	public static var hxmlPaths: Array<String> = [];
 	public static var projectDir: String = '';
+	public static var args: Array<String> = [];
 
 	public static function parseArgs() {
 		var nextParam = '';
 		var foundArg = false;
 
-		projectDir = Sys.args().pop();
+		// Sys.args() returns a fresh array on every call, so take a copy before
+		// removing the project directory haxelib appends as the final argument.
+		args = Sys.args();
+		projectDir = args.pop();
 
-		for(arg in Sys.args()) {
+		for(arg in args) {
 			foundArg = false;
 
 			// if nextParam is set, we are capturing the param value
