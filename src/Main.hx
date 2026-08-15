@@ -13,7 +13,7 @@ class Main {
 	static function main() {
 		Term.parseArgs();
 
-		if(Sys.args().length == 0 || Term.hasOption("help")) {
+		if(Term.args.length == 0 || Term.hasOption("help")) {
 			Term.usage();
 		}
 
