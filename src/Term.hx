@@ -21,10 +21,13 @@ class Term {
 	public static function parseArgs() {
 		var nextParam = '';
 		var foundArg = false;
+		var args = Sys.args();
 
-		projectDir = Sys.args().pop();
+		// haxelib appends the project directory as the final argument. Keep and
+		// mutate the same array so that the directory is not parsed as a user arg.
+		projectDir = args.pop();
 
-		for(arg in Sys.args()) {
+		for(arg in args) {
 			foundArg = false;
 
 			// if nextParam is set, we are capturing the param value
