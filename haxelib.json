@@ -4,9 +4,9 @@
   "license": "Apache",
   "tags": ["Heaps","Hashlink","package","dist"],
   "description": "Creates distributable packages for Windows, Mac, and Linux",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "classPath": "src/",
-  "releasenote": "Better HashLink dependency crawling",
+  "releasenote": "Improve icon bundling",
   "contributors": ["csclyde"],
   "dependencies": {},
   "main": "Main"
