@@ -1,6 +1,7 @@
 import haxe.io.Path;
 import FileUtil;
 import targets.hashlink.HashLink;
+import targets.hashlink.NativeDependencies;
 import targets.javascript.JavaScript;
 
 class Main {
@@ -58,6 +59,10 @@ class Main {
 			outputDir = "dist";
 		}
 
+		var iconBase = Term.getParam("icon");
+		if(iconBase == null) iconBase = NativeDependencies.loadConfig(projectDir).icon;
+		if(iconBase == null || iconBase == '') iconBase = 'meta/' + projectName;
+
 		// Prepare base folder
 		FileUtil.removeDirectory(outputDir);
 
@@ -74,7 +79,7 @@ class Main {
 			// HashLink
 			if(hasHashLinkOutput) {
 				Term.print("Building for HashLink target...");
-				var target = new HashLink(distDir, projectDir, projectName);
+				var target = new HashLink(distDir, projectDir, projectName, iconBase);
 				target.compile(hxml, outputDir);
 			}
 			// JavaScript

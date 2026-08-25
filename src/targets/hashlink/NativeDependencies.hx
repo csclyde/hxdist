@@ -16,6 +16,7 @@ typedef NativeConfig = {
 	var searchPaths:Array<String>;
 	var include:Array<String>;
 	var exclude:Array<String>;
+	var icon:Null<String>;
 }
 
 /** Discovers the native runtime closure for a HashLink application. */
@@ -143,8 +144,8 @@ class NativeDependencies {
 		queued.set(key(source), true);
 	}
 
-	static function loadConfig(projectDir:String):NativeConfig {
-		var result:NativeConfig = {searchPaths: [], include: [], exclude: []};
+	public static function loadConfig(projectDir:String):NativeConfig {
+		var result:NativeConfig = {searchPaths: [], include: [], exclude: [], icon: null};
 		var path = Path.normalize(projectDir + '/hxdist.json');
 		if(!FileSystem.exists(path)) return result;
 		var value:Dynamic;
@@ -158,6 +159,8 @@ class NativeDependencies {
 		result.searchPaths = strings(value.searchPaths);
 		result.include = strings(value.include);
 		result.exclude = strings(value.exclude);
+		if(Reflect.hasField(value, 'icon') && Std.isOfType(value.icon, String))
+			result.icon = cast value.icon;
 		return result;
 	}
 

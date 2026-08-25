@@ -44,21 +44,6 @@ class Target {
 		return StringTools.startsWith(argument, '-');
 	}
 
-	function runTool(path:String, args:Array<String>):Int {
-		var toolFp = '$distDir/tools/$path';
-		var cmd = '"${toolFp}" ${args.join(" ")}';
-
-		Term.print('Executing tool: ' + cmd);
-
-		var p = new sys.io.Process(cmd);
-		var code = p.exitCode();
-		p.close();
-		if(code != 0)
-			Term.warning('Failed with error code $code');
-
-		return code;
-	}
-
 	public static function parseHxml(dir:String, f:String):Array<String> {
 		var path = resolveHxmlPath(dir, f);
 		return parseHxmlFile(path, new Map<String, Bool>());

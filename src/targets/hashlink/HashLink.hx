@@ -7,8 +7,11 @@ import Target;
 import Term;
 
 class HashLink extends Target {
-	public function new(dd:String, pd:String, pn:String) {
+	var iconBase:String;
+
+	public function new(dd:String, pd:String, pn:String, ib:String) {
 		super(dd, pd, pn);
+		iconBase = ib;
 	}
 
 	public override function compile(hxml:String, outputDir:String) {
@@ -28,20 +31,14 @@ class HashLink extends Target {
 			var packageDir = '$outputDir/$projName';
 			createPackage(out, packageDir, platform);
 
-			var icon = '$projDir/meta/$projName.ico';
-			if(FileSystem.exists(icon)) {
-				Term.print('Setting exe icon...');
-				runTool('rcedit.exe', ['$packageDir/$projName.exe', '--set-icon "$icon"']);
-			}
-			else {
-				Term.print('No Windows icon found; skipping icon update.');
-			}
+			WindowsIcon.apply('$packageDir/$projName.exe', resolveIconBase(iconBase));
 
 			Term.print('Changing Windows executable to GUI subsystem...');
 			WindowsExecutable.setGuiSubsystem('$packageDir/$projName.exe');
 
 			FileUtil.zipFolder('$outputDir/${projName}_hl_win.zip', '$packageDir/');
 		}
+
 		else if(platform == 'Linux') {
 			var packageDir = '$outputDir/$projName';
 			createPackage(out, packageDir, platform);
@@ -73,6 +70,11 @@ class HashLink extends Target {
 		else {
 			Term.error('Unsupported host platform: $platform');
 		}
+	}
+
+	function resolveIconBase(base:String):String {
+		if(Path.isAbsolute(base)) return Path.normalize(base);
+		return Path.normalize(projDir + '/' + base);
 	}
 
 	function createPackage(bootPath:String, packageDir:String, platform:String):Void {

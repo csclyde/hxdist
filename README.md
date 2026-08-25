@@ -26,7 +26,21 @@ haxelib git hxdist git@github.com:csclyde/hxdist.git
 ```
 
 ## Usage
-If you want your Windows app to have an icon, include a .ico file with the same name as your project in a /meta folder at the top level (next to the .hxml). Same for Mac, except it excepts a .icns file.
+For a Windows HashLink app icon, hxdist accepts an icon base path from the
+`-icon` CLI option or the `icon` field in `hxdist.json`. Paths are relative to
+the project directory. For example:
+
+```json
+{
+  "icon": "meta/MyGame"
+}
+```
+
+With that base, hxdist searches for `meta/MyGame_8.png`,
+`meta/MyGame_16.png`, `meta/MyGame_32.png`, and any other numeric PNG sizes.
+If no PNG set is found, it falls back to `meta/MyGame.ico`. PNG sets take
+precedence when both forms exist. Without configuration, the default base is
+`meta/<projectName>`.
 
 For Steam/HLImGui, use the corresponding library in your HXML. hxdist reads
 the resulting HashLink bytecode and packages the required HDLL and native

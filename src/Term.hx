@@ -111,7 +111,7 @@ class Term {
 		Sys.println("OPTIONS:");
 		Sys.println("  -o <outputDir>: change the output dir (default: \"dist/\")");
 		Sys.println("  -p <projectName>: change the project name (if not provided, it will use the name of the project folder)");
-		Sys.println("  -icon <iconFilePath>: replace EXE icon (only works for Windows and HL target)");
+		Sys.println("  -icon <iconBasePath>: set Windows HL icon; searches <base>_<size>.png, then <base>.ico");
 		Sys.println("  -zip: create a zip file for each build");
 		Sys.println("  -sign: code sign the executables using a PFX certificate. A password will be requested to use the certificate. If the -pfx argument is not provided, the PFX path will be looked up in the environment var CSC_LINK. The password will also be looked up in the environment var CSC_KEY_PASSWORD.");
 		Sys.println("  -pfx <pathToPfxFile>: Use provided PFX file to sign the executables (implies the use of -sign)");
