@@ -83,7 +83,6 @@ class NativeDependencies {
 				var dependency = locate(importName, roots, localDir);
 				if(dependency == null) {
 					if(isSystemDependency(importName, platform)) {
-						Term.warning('Leaving system dependency outside package: $importName (required by ${file.destination})');
 						continue;
 					}
 					Term.error('Could not resolve native dependency "$importName" required by ${file.destination}. Add it to hxdist.json searchPaths/include.');
@@ -93,7 +92,6 @@ class NativeDependencies {
 				// this after locating it so a private DLL beside the application can
 				// still be packaged when it intentionally shadows a system DLL.
 				if(isSystemDependency(importName, platform) || (isSystemPath(dependency, platform) && !isWindowsRuntimeDependency(importName))) {
-					Term.warning('Leaving system dependency outside package: $importName (required by ${file.destination})');
 					continue;
 				}
 				addFile(dependency, importName, 'native dependency of ${file.destination}', files, byDestination, queued);
@@ -134,8 +132,6 @@ class NativeDependencies {
 		if(existing != null) {
 			if(key(existing.source) != key(source) && !isWindowsRuntimeDependency(destination))
 				Term.error('Two native files would be written as "$destination": ${existing.source} and $source');
-			if(key(existing.source) != key(source) && isWindowsRuntimeDependency(destination))
-				Term.warning('Using already selected Microsoft runtime $destination from ${existing.source}; ignoring duplicate at $source.');
 			return;
 		}
 		var file:ResolvedNativeFile = {source: source, destination: destination, reason: reason};
