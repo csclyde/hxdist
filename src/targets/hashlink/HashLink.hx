@@ -54,7 +54,17 @@ class HashLink extends Target {
 			if(Sys.command('chmod', ['+x', '$packageDir/run.sh']) != 0)
 				Term.warning('Could not mark run.sh as executable.');
 
-			if(Sys.command('zip', ['-j', '-r', '$outputDir/${projName}_hl_linux.zip', '$packageDir']) != 0)
+			var previousDir = Sys.getCwd();
+			var zipCode = -1;
+			try {
+				Sys.setCwd(packageDir);
+				zipCode = Sys.command('zip', ['-r', '$outputDir/${projName}_hl_linux.zip', '.']);
+			} catch(e:Dynamic) {
+				Sys.setCwd(previousDir);
+				Term.error('Could not create the Linux zip archive: $e');
+			}
+			Sys.setCwd(previousDir);
+			if(zipCode != 0)
 				Term.error('Could not create the Linux zip archive.');
 		}
 		else if(platform == 'Mac') {
@@ -64,7 +74,7 @@ class HashLink extends Target {
 			if(Sys.command('chmod', ['+x', '$packageDir/$projName']) != 0)
 				Term.warning('Could not mark the macOS executable as executable.');
 
-			FileUtil.zipFolder('$outputDir/${projName}_hl_mac_itch.zip', '$outputDir/');
+			FileUtil.zipFolder('$outputDir/${projName}_hl_mac_itch.zip', '$packageDir/');
 			FileUtil.zipFolder('$outputDir/${projName}_hl_mac_steam.zip', '$outputDir/$projName/');
 		}
 		else {
@@ -80,6 +90,7 @@ class HashLink extends Target {
 	function createPackage(bootPath:String, packageDir:String, platform:String):Void {
 		Term.print('Discovering HashLink native dependencies...');
 		var files = NativeDependencies.resolve(bootPath, projDir, projName, platform);
+		NativeDependencies.printTree(files);
 		FileUtil.createDirectory(packageDir);
 
 		var hasSteam = false;
@@ -93,10 +104,7 @@ class HashLink extends Target {
 
 		FileUtil.copyFile(bootPath, '$packageDir/hlboot.dat');
 		if(platform == 'Linux') {
-			var dollar = String.fromCharCode(36);
-			var runScript = '#!/bin/sh\n'
-				+ 'LD_LIBRARY_PATH="' + dollar + '(dirname "' + dollar + '0")" "' + dollar + '(dirname "' + dollar + '0")/' + projName + '.x64"\n';
-			sys.io.File.saveContent('$packageDir/run.sh', runScript);
+			sys.io.File.saveContent('$packageDir/run.sh', linuxRunScript(projName));
 		}
 
 		var appId = '$projDir/meta/steam_appid.txt';
@@ -104,5 +112,14 @@ class HashLink extends Target {
 			FileUtil.copyFile(appId, '$packageDir/steam_appid.txt');
 
 		Term.print('Created $packageDir');
+	}
+
+	static function linuxRunScript(name:String):String {
+		FileUtil.validateProjectName(name);
+		var dollar = String.fromCharCode(36);
+		return '#!/bin/sh\n'
+			+ 'app_dir="' + dollar + '(CDPATH= cd -- "' + dollar + '(dirname -- "' + dollar + '0")" && pwd)" || exit 1\n'
+			+ 'export LD_LIBRARY_PATH="' + dollar + 'app_dir' + dollar + '{LD_LIBRARY_PATH:+:' + dollar + 'LD_LIBRARY_PATH}"\n'
+			+ 'exec "' + dollar + 'app_dir/' + name + '.x64" "' + dollar + '@"\n';
 	}
 }

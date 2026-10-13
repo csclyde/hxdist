@@ -22,10 +22,13 @@ class Term {
 		var nextParam = '';
 		var foundArg = false;
 		var args = Sys.args();
+		selectedOptions = [];
+		selectedParams = [];
+		hxmlPaths = [];
 
 		// haxelib appends the project directory as the final argument. Keep and
 		// mutate the same array so that the directory is not parsed as a user arg.
-		projectDir = args.pop();
+		projectDir = args.length == 0 ? Sys.getCwd() : args.pop();
 
 		for(arg in args) {
 			foundArg = false;

@@ -83,7 +83,6 @@ class WindowsExecutable {
 		}
 		sum = (sum % 0x10000) + Math.floor(sum / 0x10000);
 		sum += bytes.length;
-		sum = (sum % 0x10000) + Math.floor(sum / 0x10000);
 		return Std.int(sum);
 	}
 

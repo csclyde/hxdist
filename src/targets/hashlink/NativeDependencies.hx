@@ -10,6 +10,8 @@ typedef ResolvedNativeFile = {
 	var source:String;
 	var destination:String;
 	var reason:String;
+	var dependencies:Array<ResolvedNativeFile>;
+	var rootReasons:Array<String>;
 }
 
 typedef NativeConfig = {
@@ -29,7 +31,7 @@ class NativeDependencies {
 		var files:Array<ResolvedNativeFile> = [];
 		var byDestination = new Map<String, ResolvedNativeFile>();
 		var queued = new Map<String, Bool>();
-		var inspected = new Map<String, Bool>();
+		var inspected = new Map<String, Null<Array<String>>>();
 
 		// These are the VM and launcher files. Their native dependencies are
 		// inspected as well, so they do not need a second handwritten list.
@@ -70,10 +72,8 @@ class NativeDependencies {
 		while(queueIndex < files.length) {
 			var file = files[queueIndex++];
 			var sourceKey = key(file.source);
-			if(inspected.exists(sourceKey)) continue;
-			inspected.set(sourceKey, true);
-
-			var imports = inspectBinary(file.source, platform);
+			if(!inspected.exists(sourceKey)) inspected.set(sourceKey, inspectBinary(file.source, platform));
+			var imports = inspected.get(sourceKey);
 			if(imports == null) continue;
 			for(importName in imports) {
 				if(isExcluded(importName, config.exclude)) continue;
@@ -94,7 +94,7 @@ class NativeDependencies {
 				if(isSystemDependency(importName, platform) || (isSystemPath(dependency, platform) && !isWindowsRuntimeDependency(importName))) {
 					continue;
 				}
-				addFile(dependency, importName, 'native dependency of ${file.destination}', files, byDestination, queued);
+				addFile(dependency, importName, 'native dependency of ${file.destination}', files, byDestination, queued, file);
 			}
 		}
 
@@ -124,7 +124,7 @@ class NativeDependencies {
 		addFile(source, Path.withoutDirectory(source), 'HashLink native library $name', files, byDestination, queued);
 	}
 
-	static function addFile(source:String, destination:String, reason:String, files:Array<ResolvedNativeFile>, byDestination:Map<String, ResolvedNativeFile>, queued:Map<String, Bool>):Void {
+	static function addFile(source:String, destination:String, reason:String, files:Array<ResolvedNativeFile>, byDestination:Map<String, ResolvedNativeFile>, queued:Map<String, Bool>, ?parent:ResolvedNativeFile):Void {
 		source = Path.normalize(FileSystem.fullPath(source));
 		destination = Path.withoutDirectory(StringTools.replace(destination, '\\', '/'));
 		var destinationKey = key(destination);
@@ -132,12 +132,48 @@ class NativeDependencies {
 		if(existing != null) {
 			if(key(existing.source) != key(source) && !isWindowsRuntimeDependency(destination))
 				Term.error('Two native files would be written as "$destination": ${existing.source} and $source');
+			linkFile(existing, reason, parent);
 			return;
 		}
-		var file:ResolvedNativeFile = {source: source, destination: destination, reason: reason};
+		var file:ResolvedNativeFile = {source: source, destination: destination, reason: reason, dependencies: [], rootReasons: []};
+		linkFile(file, reason, parent);
 		byDestination.set(destinationKey, file);
 		files.push(file);
 		queued.set(key(source), true);
+	}
+
+	static function linkFile(file:ResolvedNativeFile, reason:String, parent:Null<ResolvedNativeFile>):Void {
+		if(parent == null) {
+			if(!file.rootReasons.contains(reason)) file.rootReasons.push(reason);
+		} else if(!parent.dependencies.contains(file)) {
+			parent.dependencies.push(file);
+		}
+	}
+
+	/** Show every packaged dependency edge, expanding shared files only once. */
+	public static function printTree(files:Array<ResolvedNativeFile>):Void {
+		for(line in treeLines(files)) Term.print(line);
+	}
+
+	static function treeLines(files:Array<ResolvedNativeFile>):Array<String> {
+		var lines = ['Native dependency tree (packaged files):'];
+		var expanded = new Map<String, Bool>();
+		function visit(file:ResolvedNativeFile, prefix:String, last:Bool, root:Bool):Void {
+			var seen = expanded.exists(key(file.destination));
+			var label = file.destination;
+			if(root) label += ' [' + file.rootReasons.join(', ') + ']';
+			label += ' <- ' + file.source;
+			if(seen) label += ' (already shown)';
+			lines.push(prefix + (last ? '`-- ' : '|-- ') + label);
+			if(seen) return;
+			expanded.set(key(file.destination), true);
+			var childPrefix = prefix + (last ? '    ' : '|   ');
+			for(i in 0...file.dependencies.length)
+				visit(file.dependencies[i], childPrefix, i == file.dependencies.length - 1, false);
+		}
+		var roots = [for(file in files) if(file.rootReasons.length > 0) file];
+		for(i in 0...roots.length) visit(roots[i], '', i == roots.length - 1, true);
+		return lines;
 	}
 
 	public static function loadConfig(projectDir:String):NativeConfig {
@@ -152,19 +188,31 @@ class NativeDependencies {
 			Term.error('Could not parse $path: $e');
 			return result;
 		}
-		result.searchPaths = strings(value.searchPaths);
-		result.include = strings(value.include);
-		result.exclude = strings(value.exclude);
-		if(Reflect.hasField(value, 'icon') && Std.isOfType(value.icon, String))
-			result.icon = cast value.icon;
+		try {
+			if(value == null || !Reflect.isObject(value) || Std.isOfType(value, Array) || Std.isOfType(value, String))
+				throw 'Expected a JSON object';
+			result.searchPaths = strings(value.searchPaths);
+			result.include = strings(value.include);
+			result.exclude = strings(value.exclude);
+			if(Reflect.hasField(value, 'icon') && value.icon != null) {
+				if(!Std.isOfType(value.icon, String)) throw 'icon must be a string';
+				result.icon = cast value.icon;
+			}
+		} catch(e:Dynamic) {
+			Term.error('Invalid configuration in $path: $e');
+		}
 		return result;
 	}
 
 	static function strings(value:Dynamic):Array<String> {
 		var result:Array<String> = [];
-		if(value == null || !Std.isOfType(value, Array)) return result;
-		for(item in (cast value:Array<Dynamic>))
-			if(Std.isOfType(item, String)) result.push(cast item);
+		if(value == null) return result;
+		if(!Std.isOfType(value, Array)) throw 'searchPaths, include, and exclude must be arrays of strings';
+		for(item in (cast value:Array<Dynamic>)) {
+			if(!Std.isOfType(item, String) || StringTools.trim(cast item) == '')
+				throw 'Native configuration entries must be nonempty strings';
+			result.push(cast item);
+		}
 		return result;
 	}
 
@@ -287,32 +335,41 @@ class NativeDependencies {
 	}
 
 	static function inspectBinary(path:String, platform:String):Null<Array<String>> {
-		var bytes = sys.io.File.getBytes(path);
-		if(bytes.length >= 2 && bytes.get(0) == 0x4D && bytes.get(1) == 0x5A)
-			return inspectPE(bytes);
-		if(bytes.length >= 4 && bytes.get(0) == 0x7F && bytes.get(1) == 0x45 && bytes.get(2) == 0x4C && bytes.get(3) == 0x46)
-			return inspectELF(bytes);
-		if(platform == 'Mac') return inspectMachO(path);
-		return null;
+		try {
+			var bytes = sys.io.File.getBytes(path);
+			if(bytes.length >= 2 && bytes.get(0) == 0x4D && bytes.get(1) == 0x5A)
+				return inspectPE(bytes);
+			if(bytes.length >= 4 && bytes.get(0) == 0x7F && bytes.get(1) == 0x45 && bytes.get(2) == 0x4C && bytes.get(3) == 0x46)
+				return inspectELF(bytes);
+			if(platform == 'Mac') return inspectMachO(path);
+			throw 'Unrecognized native binary format';
+		} catch(e:Dynamic) {
+			Term.error('Could not inspect native binary "$path": $e');
+			return null;
+		}
 	}
 
 	static function inspectPE(b:Bytes):Array<String> {
-		if(b.length < 0x40) return [];
+		if(b.length < 0x40) throw 'Truncated PE header';
 		var pe = u32(b, 0x3C);
-		if(pe < 0 || pe + 24 > b.length || u32(b, pe) != 0x00004550) return [];
+		if(pe < 0 || pe > b.length - 24 || u32(b, pe) != 0x00004550) throw 'Invalid PE header';
 		var coff = pe + 4;
 		var sections = u16(b, coff + 2);
 		var optionalSize = u16(b, coff + 16);
 		var optional = coff + 20;
-		if(optional + optionalSize > b.length) return [];
+		if(optionalSize < 2 || optionalSize > b.length - optional) throw 'Invalid PE optional header';
 		var magic = u16(b, optional);
+		if(magic != 0x10B && magic != 0x20B) throw 'Unsupported PE format';
 		var directory = magic == 0x20B ? optional + 112 : optional + 96;
 		var numberOfDirectoriesOffset = magic == 0x20B ? optional + 108 : optional + 92;
-		if(directory + 16 > b.length || numberOfDirectoriesOffset + 4 > b.length) return [];
+		if(numberOfDirectoriesOffset + 4 > optional + optionalSize) throw 'Truncated PE data directory count';
 		var numberOfDirectories = u32(b, numberOfDirectoriesOffset);
+		if(numberOfDirectories < 0 || numberOfDirectories > Std.int((optional + optionalSize - directory) / 8))
+			throw 'Truncated PE data directories';
 		var importRva = numberOfDirectories > 1 ? u32(b, directory + 8) : 0;
 		var delayRva = numberOfDirectories > 13 ? u32(b, directory + 13 * 8) : 0;
 		var sectionStart = optional + optionalSize;
+		if(sections > Std.int((b.length - sectionStart) / 40)) throw 'Truncated PE section table';
 		var result:Array<String> = [];
 		if(importRva != 0) result = result.concat(readPEImports(b, importRva, sectionStart, sections, 20, 12));
 		if(delayRva != 0) result = result.concat(readPEImports(b, delayRva, sectionStart, sections, 32, 4));
@@ -322,44 +379,50 @@ class NativeDependencies {
 	static function readPEImports(b:Bytes, rva:Int, sectionStart:Int, sectionCount:Int, stride:Int, nameField:Int):Array<String> {
 		var result:Array<String> = [];
 		var offset = peRvaOffset(b, rva, sectionStart, sectionCount);
-		if(offset < 0) return result;
+		if(offset < 0) throw 'PE imports are not backed by file data';
 		for(i in 0...4096) {
 			var at = offset + i * stride;
-			if(at + stride > b.length) break;
+			if(at < 0 || at > b.length - stride) throw 'Truncated PE import table';
 			var nameRva = u32(b, at + nameField);
-			if(nameRva == 0) break;
+			if(nameRva == 0) return result;
 			var nameOffset = peRvaOffset(b, nameRva, sectionStart, sectionCount);
-			if(nameOffset < 0) break;
+			if(nameOffset < 0) throw 'Invalid PE import name address';
 			var name = cstring(b, nameOffset);
 			if(name != '') result.push(name);
 		}
-		return result;
+		throw 'PE import table has no terminator within the inspection limit';
 	}
 
 	static function peRvaOffset(b:Bytes, rva:Int, sectionStart:Int, count:Int):Int {
 		for(i in 0...count) {
 			var at = sectionStart + i * 40;
 			if(at + 40 > b.length) return -1;
-			var virtualSize = u32(b, at + 8);
 			var virtualAddress = u32(b, at + 12);
 			var rawSize = u32(b, at + 16);
 			var rawOffset = u32(b, at + 20);
-			var size = virtualSize > rawSize ? virtualSize : rawSize;
-			if(rva >= virtualAddress && rva < virtualAddress + size)
-				return rawOffset + (rva - virtualAddress);
+			var relative = rva - virtualAddress;
+			if(rva >= virtualAddress && relative >= 0 && relative < rawSize) {
+				if(rawOffset < 0 || rawOffset > b.length || relative >= b.length - rawOffset) return -1;
+				return rawOffset + relative;
+			}
 		}
 		return -1;
 	}
 
 	static function inspectELF(b:Bytes):Array<String> {
-		if(b.length < 64) return [];
+		if(b.length < 52) throw 'Truncated ELF header';
+		if(b.get(4) != 1 && b.get(4) != 2) throw 'Unsupported ELF class';
 		var is64 = b.get(4) == 2;
+		if(is64 && b.length < 64) throw 'Truncated ELF64 header';
 		var little = b.get(5) == 1;
-		if(!little) return [];
+		if(!little) throw 'Unsupported ELF endianness';
 		var phoff = is64 ? u32(b, 32) : u32(b, 28);
 		var phentsize = u16(b, is64 ? 54 : 42);
 		var phnum = u16(b, is64 ? 56 : 44);
+		if(phoff < 0 || phoff > b.length || phentsize < (is64 ? 56 : 32)
+			|| phnum > Std.int((b.length - phoff) / phentsize)) throw 'Invalid ELF program header table';
 		var dynamicOffset = -1;
+		var dynamicSize = 0;
 		var loads:Array<{v:Int, o:Int, size:Int}> = [];
 		for(i in 0...phnum) {
 			var at = phoff + i * phentsize;
@@ -368,24 +431,34 @@ class NativeDependencies {
 			var offset = is64 ? u32(b, at + 8) : u32(b, at + 4);
 			var vaddr = is64 ? u32(b, at + 16) : u32(b, at + 8);
 			var filesz = is64 ? u32(b, at + 32) : u32(b, at + 16);
-			var memsz = is64 ? u32(b, at + 40) : u32(b, at + 20);
-			if(type == 2) dynamicOffset = offset;
-			if(type == 1) loads.push({v:vaddr, o:offset, size:memsz > filesz ? memsz : filesz});
+			if(offset < 0 || filesz < 0 || offset > b.length || filesz > b.length - offset) throw 'Invalid ELF segment';
+			if(type == 2) {
+				dynamicOffset = offset;
+				dynamicSize = filesz;
+			}
+			if(type == 1) loads.push({v:vaddr, o:offset, size:filesz});
 		}
 		if(dynamicOffset < 0) return [];
 		var strtab = -1;
 		var needed:Array<Int> = [];
 		var entrySize = is64 ? 16 : 8;
-		for(i in 0...65536) {
+		if(dynamicSize % entrySize != 0) throw 'Truncated ELF dynamic table';
+		var terminated = false;
+		for(i in 0...Std.int(dynamicSize / entrySize)) {
 			var at = dynamicOffset + i * entrySize;
 			if(at + entrySize > b.length) break;
 			var tag = u32(b, at);
 			var value = is64 ? u32(b, at + 8) : u32(b, at + 4);
-			if(tag == 0) break;
+			if(tag == 0) {
+				terminated = true;
+				break;
+			}
 			if(tag == 1) needed.push(value);
 			if(tag == 5) strtab = value;
 		}
-		if(strtab < 0) return [];
+		if(!terminated) throw 'ELF dynamic table has no terminator';
+		if(needed.length == 0) return [];
+		if(strtab < 0) throw 'ELF dependencies have no string table';
 		var strOffset = -1;
 		for(load in loads) {
 			if(strtab >= load.v && strtab < load.v + load.size) {
@@ -393,7 +466,7 @@ class NativeDependencies {
 				break;
 			}
 		}
-		if(strOffset < 0) return [];
+		if(strOffset < 0) throw 'ELF string table is not backed by file data';
 		var result:Array<String> = [];
 		for(index in needed) {
 			var name = cstring(b, strOffset + index);
@@ -413,7 +486,7 @@ class NativeDependencies {
 			var output = p.stdout.readAll().toString();
 			var code = p.exitCode();
 			p.close();
-			if(code != 0) return null;
+			if(code != 0) throw 'otool exited with status $code';
 			var result:Array<String> = [];
 			var first = true;
 			for(line in output.split('\n')) {
@@ -428,7 +501,7 @@ class NativeDependencies {
 			}
 			return unique(result);
 		}
-		catch(e:Dynamic) return null;
+		catch(e:Dynamic) throw 'Could not inspect Mach-O dependencies: $e';
 	}
 
 	static function findOnPath(name:String):String {
@@ -499,13 +572,20 @@ class NativeDependencies {
 
 	static function key(value:String):String return Sys.systemName() == 'Windows' ? value.toLowerCase() : value;
 
-	static function u16(b:Bytes, at:Int):Int return b.get(at) | (b.get(at + 1) << 8);
-	static function u32(b:Bytes, at:Int):Int return b.get(at) | (b.get(at + 1) << 8) | (b.get(at + 2) << 16) | (b.get(at + 3) << 24);
+	static function u16(b:Bytes, at:Int):Int {
+		if(at < 0 || at > b.length - 2) throw 'Truncated native binary field';
+		return b.get(at) | (b.get(at + 1) << 8);
+	}
+	static function u32(b:Bytes, at:Int):Int {
+		if(at < 0 || at > b.length - 4) throw 'Truncated native binary field';
+		return b.get(at) | (b.get(at + 1) << 8) | (b.get(at + 2) << 16) | (b.get(at + 3) << 24);
+	}
 
 	static function cstring(b:Bytes, at:Int):String {
-		if(at < 0 || at >= b.length) return '';
+		if(at < 0 || at >= b.length) throw 'Invalid native string offset';
 		var end = at;
 		while(end < b.length && b.get(end) != 0) end++;
+		if(end == b.length) throw 'Unterminated native dependency name';
 		return b.sub(at, end - at).toString();
 	}
 }

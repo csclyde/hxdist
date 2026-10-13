@@ -57,6 +57,12 @@ Paths are relative to the project root. `searchPaths` adds search locations,
 `include` adds files that bytecode inspection cannot find, and `exclude` skips
 dependencies. Missing required files and destination conflicts fail the build.
 
+After discovery, the console shows a tree of packaged native dependencies with
+their source paths. Root entries show whether they came from the HashLink
+runtime, bytecode native libraries, or `hxdist.json` inclusions. Shared dependencies
+appear under each parent, with `(already shown)` preventing repeated expansion
+and cycles. System files and configured exclusions stay outside the package tree.
+
 For Steam, include its library in the HXML. If Steam is detected, hxdist copies
 `meta/steam_appid.txt`. Point the Linux Steam launch configuration to `run.sh`.
 

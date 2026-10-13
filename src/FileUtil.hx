@@ -1,6 +1,43 @@
 import haxe.io.Path;
 
 class FileUtil {
+	/** Output is cleared recursively; never allow a project or filesystem root. */
+	public static function validateOutputDirectory(path:String, projectDir:String):String {
+		if(path == null || StringTools.trim(path) == '') throw 'Output directory must not be empty.';
+		var output = Path.removeTrailingSlashes(canonicalPath(path));
+		var project = Path.removeTrailingSlashes(Path.normalize(sys.FileSystem.fullPath(projectDir)));
+		var outputKey = Sys.systemName() == 'Windows' ? output.toLowerCase() : output;
+		var projectKey = Sys.systemName() == 'Windows' ? project.toLowerCase() : project;
+		if(outputKey == '' || Path.directory(output) == '' || Path.directory(output) == output
+			|| outputKey == projectKey || StringTools.startsWith(projectKey, outputKey + '/'))
+			throw 'Refusing to clear a filesystem root, project directory, or project ancestor: $output';
+		if(sys.FileSystem.exists(output) && !sys.FileSystem.isDirectory(output))
+			throw 'Output directory is an existing file: $output';
+		return output;
+	}
+
+	static function canonicalPath(path:String):String {
+		// fullPath requires an existing path on Unix. Resolve the nearest
+		// existing ancestor, then append directories that will be created.
+		var absolute = Path.normalize(sys.FileSystem.absolutePath(path));
+		var suffix:Array<String> = [];
+		while(!sys.FileSystem.exists(absolute)) {
+			var parent = Path.directory(absolute);
+			if(parent == absolute || parent == '') throw 'Cannot resolve output directory: $path';
+			suffix.unshift(Path.withoutDirectory(absolute));
+			absolute = parent;
+		}
+		return Path.normalize(Path.join([sys.FileSystem.fullPath(absolute)].concat(suffix)));
+	}
+
+	public static function validateProjectName(name:String):Void {
+		if(name == null || StringTools.trim(name) == '' || name == '.' || name == '..')
+			throw 'Project name must not be empty or a relative path.';
+		for(i in 0...name.length)
+			if(name.charCodeAt(i) < 32 || '/\\"$`<>:|?*'.indexOf(name.charAt(i)) >= 0)
+				throw 'Project name contains a path separator, shell substitution, or invalid filename character.';
+	}
+
     public static function createDirectory(path:String) {
 		path = Path.normalize(path);
 
@@ -52,8 +89,9 @@ class FileUtil {
     public static function zipFolder(zipPath:String, basePath:String) {
 		zipPath = Path.normalize(zipPath);
 		basePath = Path.normalize(basePath);
+		basePath = Path.removeTrailingSlashes(basePath);
 
-		if(zipPath.indexOf(".zip") < 0)
+		if(!StringTools.endsWith(zipPath.toLowerCase(), '.zip'))
 			zipPath += ".zip";
 
 		Term.print("Zipping " + basePath + "...");

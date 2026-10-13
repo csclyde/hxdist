@@ -39,8 +39,8 @@ class HashLinkBytecode {
 		var nconstants = version >= 4 ? r.uindex() : 0;
 		r.uindex(); // entrypoint
 
-		r.skip(nints * 4);
-		r.skip(nfloats * 8);
+		r.skipElements(nints, 4);
+		r.skipElements(nfloats, 8);
 		var strings = readStrings(r, nstrings);
 
 		if(version >= 5) {
@@ -61,7 +61,7 @@ class HashLinkBytecode {
 			r.index();
 
 		var result:Array<HashLinkNative> = [];
-		var seen = new Map<String, Bool>();
+		var seen = new Map<String, HashLinkNative>();
 		for(i in 0...nnatives) {
 			var library = stringAt(strings, r.index(), 'native library');
 			r.index(); // native function name
@@ -72,8 +72,11 @@ class HashLinkBytecode {
 			if(optional) library = library.substr(1);
 			if(library == '' || library == 'builtin' || library == 'std') continue;
 			if(!seen.exists(library)) {
-				seen.set(library, true);
-				result.push({name: library, optional: optional});
+				var native:HashLinkNative = {name: library, optional: optional};
+				seen.set(library, native);
+				result.push(native);
+			} else if(!optional) {
+				seen.get(library).optional = false;
 			}
 		}
 
@@ -105,7 +108,9 @@ class HashLinkBytecode {
 	}
 
 	static function skipType(r:HLReader):Void {
-		switch(r.u8()) {
+		var kind = r.u8();
+		if(kind > 22) throw 'Unknown HashLink type kind $kind';
+		switch(kind) {
 			case 10, 20: // HFUN, HMETHOD
 				var nargs = r.uindex();
 				for(i in 0...nargs) r.index();
@@ -190,13 +195,19 @@ private class HLReader {
 	}
 
 	public function skip(size:Int):Void {
-		if(size < 0 || pos + size > bytes.length)
+		if(size < 0 || size > bytes.length - pos)
 			throw 'Invalid HashLink bytecode length';
 		pos += size;
 	}
 
+	public function skipElements(count:Int, width:Int):Void {
+		if(count < 0 || count > Std.int((bytes.length - pos) / width))
+			throw 'Invalid HashLink table length';
+		skip(count * width);
+	}
+
 	public function readBytes(size:Int):Bytes {
-		if(size < 0 || pos + size > bytes.length)
+		if(size < 0 || size > bytes.length - pos)
 			throw 'Invalid HashLink bytecode length';
 		var result = bytes.sub(pos, size);
 		pos += size;

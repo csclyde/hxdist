@@ -299,14 +299,16 @@ class WindowsIcon {
 		var count = u16(bytes, coff + 2);
 		var optionalSize = u16(bytes, coff + 16);
 		var optional = coff + 20;
-		if(optional + optionalSize > bytes.length)
+		if(optionalSize < 2 || optionalSize > bytes.length - optional)
 			Term.error('Cannot set icon in $path: invalid PE optional header.');
 		var magic = u16(bytes, optional);
 		var dataDirectory = magic == PE32 ? optional + 96 : magic == PE32_PLUS ? optional + 112 : -1;
-		if(dataDirectory < 0 || optionalSize < (dataDirectory - optional) + 16)
+		if(dataDirectory < 0 || optionalSize < (dataDirectory - optional) + 24)
 			Term.error('Cannot set icon in $path: unsupported PE optional header.');
 		var sectionAlignment = u32(bytes, optional + 32);
 		var fileAlignment = u32(bytes, optional + 36);
+		if(count == 0 || sectionAlignment <= 0 || fileAlignment <= 0)
+			Term.error('Cannot set icon in $path: invalid PE sections or alignment.');
 		var sectionTable = optional + optionalSize;
 		var sections:Array<PeSection> = [];
 		for(i in 0...count) {
@@ -333,6 +335,8 @@ class WindowsIcon {
 	}
 
 	static function readDirectory(bytes:Bytes, base:Int, size:Int, sections:Array<PeSection>, offset:Int, path:String, seen:Map<Int, Bool>):ResourceNode {
+		if(base < 0 || size < 0 || base > bytes.length || size > bytes.length - base)
+			Term.error('Cannot read icon resources from $path: resource directory is outside the file.');
 		if(offset < 0 || offset + 16 > size)
 			Term.error('Cannot read icon resources from $path: invalid resource directory.');
 		if(seen.exists(offset))
@@ -368,7 +372,7 @@ class WindowsIcon {
 				var dataRva = u32(bytes, base + dataEntry);
 				var dataLength = u32(bytes, base + dataEntry + 4);
 				var fileOffset = rvaToFile(dataRva, sections, path);
-				if(fileOffset + dataLength > bytes.length)
+				if(dataLength < 0 || fileOffset < 0 || fileOffset > bytes.length || dataLength > bytes.length - fileOffset)
 					Term.error('Cannot read icon resources from $path: resource data is outside the file.');
 				child = resourceLeafNode(named, childId, childName, bytes.sub(fileOffset, dataLength));
 				child.leaf.codePage = u32(bytes, base + dataEntry + 8);
@@ -572,7 +576,6 @@ class WindowsIcon {
 		}
 		sum = (sum % 0x10000) + Math.floor(sum / 0x10000);
 		sum += bytes.length;
-		sum = (sum % 0x10000) + Math.floor(sum / 0x10000);
 		writeU32(bytes, checksumOffset, Std.int(sum));
 	}
 

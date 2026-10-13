@@ -14,7 +14,7 @@ class Main {
 	static function main() {
 		Term.parseArgs();
 
-		if(Sys.args().length == 0 || Term.hasOption("help")) {
+		if(Sys.args().length <= 1 || Term.hasOption("help")) {
 			Term.usage();
 		}
 
@@ -23,8 +23,11 @@ class Main {
 
 		// Set CWD to the directory haxelib was called
 		distDir = Path.normalize(Sys.getCwd());
-		projectDir = Path.normalize(Term.projectDir);
-		projectDir = Path.removeTrailingSlashes(projectDir);
+		try {
+			projectDir = Path.removeTrailingSlashes(Path.normalize(sys.FileSystem.fullPath(Term.projectDir)));
+		} catch(e:Dynamic) {
+			Term.error('Could not resolve the project directory: ${Term.projectDir} ($e)');
+		}
 		
 		if(verbose) {
 			Term.print("hxdist Dir = " + distDir);
@@ -52,6 +55,7 @@ class Main {
 		}
 
 		Term.print("Project name: " + projectName);
+		try FileUtil.validateProjectName(projectName) catch(e:Dynamic) Term.error(e);
 
 		// Output folder
 		var outputDir = Term.getParam("output_dir");
@@ -64,6 +68,17 @@ class Main {
 		if(iconBase == null || iconBase == '') iconBase = 'meta/' + projectName;
 
 		// Prepare base folder
+		try {
+			outputDir = FileUtil.validateOutputDirectory(outputDir, projectDir);
+		} catch(e:Dynamic) {
+			Term.error(e);
+		}
+		// Validate every input before clearing the previous distribution.
+		for(hxml in Term.hxmlPaths) {
+			var content = Target.parseHxml(projectDir, hxml);
+			if(Target.hasHxmlParam(content, '-hl') == Target.hasHxmlParam(content, '-js'))
+				Term.error('Each HXML must contain exactly one supported output target (-hl or -js): $hxml');
+		}
 		FileUtil.removeDirectory(outputDir);
 
 		// Parse HXML files given as parameters
